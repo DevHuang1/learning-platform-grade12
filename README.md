@@ -10,8 +10,9 @@ dashboard. Student-friendly UI with four sections: **Dashboard**, **Quiz**,
 - **Enterprise dashboard** (`/`) — role-aware home with student learning
   analytics: KPI stats (words answered, accuracy, streak, today's activity),
   14-day accuracy chart, mode breakdown, unit mastery bars, upcoming exams and
-  recent results (recharts). Teachers get a management overview (submissions,
-  pending grading, scheduled/published exams).
+  recent results (recharts), all filterable by subject. Teachers get a
+  management overview (submissions, pending grading, scheduled/published
+  exams).
 - **Auth** — Supabase Auth (email/password) with sign-up/login, session
   management, route guarding via `src/proxy.ts`, and a profile-based role
   system (`student` | `teacher`).
@@ -26,14 +27,20 @@ dashboard. Student-friendly UI with four sections: **Dashboard**, **Quiz**,
   meaning clue, normal / advanced difficulty, all 12 units, streak). Works
   fully offline from bundled JSON. Signed-in users get cloud history sync.
 - **Exam** — fully customizable exam sheets. A sheet is made of sections, and
-  each question carries its own marks value (1 mark, 5 marks, 10 marks, any
-  number). Students take exams one question at a time and upload a **photo of
-  their written answer**, stored in the Supabase `exam-answers` storage bucket.
-  Sheet builder + list are teacher-only.
+  both sections and individual questions can carry their own **images**
+  (stored in the `question-images` bucket). Every question has a **type** —
+  multiple choice, short answer, fill in the blank, or true/false — and its
+  own marks value (1 mark, 5 marks, 10 marks, any number). Exam sheets and
+  schedules share a fixed subject list (**Chemistry / English / Physics /
+  Maths**), and exam lists and the dashboard filter by subject. Students take
+  exams one question at a time and upload a **photo of their written answer**,
+  stored in the Supabase `exam-answers` storage bucket. Sheet builder + list
+  are teacher-only.
 - **Result** — students see their own submissions and awarded marks; teachers
   see all students and can grade (award marks + feedback per answer).
-- **Schedule** — exam schedule announcements. Students see upcoming/past exams;
-  teachers manage (add/edit/deactivate/delete) schedules.
+- **Schedule** — exam schedule announcements (tagged with one of the fixed
+  subjects). Students see upcoming/past exams; teachers manage
+  (add/edit/deactivate/delete) schedules.
 
 ## Project layout
 
@@ -41,11 +48,11 @@ dashboard. Student-friendly UI with four sections: **Dashboard**, **Quiz**,
 web/
   src/app/          # app router pages (/, /login, /register, /quiz, /exam/…, /result, /schedule)
   src/components/   # Shell+sidebar layout, AuthProvider, Card/Button/Badge/StatBox UI kit
-  src/lib/          # supabase clients, db access layer, storage uploads, analytics, vocab helpers, types
+  src/lib/          # supabase clients, db access layer, storage uploads (incl. question/section images), analytics, constants (subjects, question types), types
   src/proxy.ts      # route guard middleware (Next 16)
   src/data/         # vocab + sentences JSON extracted from the original index.html
   supabase/
-    schema.sql      # tables + RLS policies (auth-aware, roles)
+    schema.sql      # tables + RLS policies (auth-aware, roles; idempotent — safe to re-run)
     seed.js         # pushes vocab data & creates buckets (needs .env.local)
 ```
 
@@ -61,7 +68,9 @@ npm run dev
 1. Create a Supabase project.
 2. Run `supabase/schema.sql` in the SQL editor. This creates tables, the
    `profiles` table (auto-created on sign-up via trigger), and auth-aware RLS
-   policies.
+   policies. Policies are idempotent (`DROP POLICY IF EXISTS` before each
+   `CREATE POLICY`) and new columns use `ADD COLUMN IF NOT EXISTS`, so the file
+   can be re-run safely to apply migrations.
 3. `cd web && node supabase/seed.js` to load the 12 units, 585 words and
    585 normal + 585 advanced sentences, and create the `exam-answers` and
    `question-images` storage buckets.

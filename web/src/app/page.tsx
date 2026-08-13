@@ -26,6 +26,7 @@ import {
 } from "@/components/ui";
 import { useToast } from "@/components/toast";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { SUBJECTS } from "@/lib/constants";
 import {
   accuracySeries,
   computeMetrics,
@@ -89,6 +90,21 @@ function dateBadge(dateStr: string) {
 
 function statusTone(status: ExamSubmissionRow["status"]) {
   return status === "graded" ? "green" : "amber";
+}
+
+function subjectTone(subject: string) {
+  switch (subject) {
+    case "Chemistry":
+      return "amber";
+    case "English":
+      return "indigo";
+    case "Physics":
+      return "green";
+    case "Maths":
+      return "gray";
+    default:
+      return "gray";
+  }
 }
 
 function BoltIcon({ className }: { className?: string }) {
@@ -270,9 +286,10 @@ export default function DashboardPage() {
   const [sheets, setSheets] = useState<ExamSheetRow[]>([]);
   const [submissions, setSubmissions] = useState<ExamSubmissionRow[]>([]);
   const [sheetDetails, setSheetDetails] = useState<
-    Record<number, { title: string; total: number }>
+    Record<number, { title: string; total: number; subject: string }>
   >({});
   const [busy, setBusy] = useState(true);
+  const [subjectFilter, setSubjectFilter] = useState<string>("All");
   const [onboardDone, setOnboardDone] = useState(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem(ONBOARD_KEY) === "1";
@@ -295,7 +312,10 @@ export default function DashboardPage() {
     ])
       .then(async ([hist, scheds, subs, sheetRows]) => {
         const sheetById = new Map(sheetRows.map((s) => [s.id, s]));
-        const details: Record<number, { title: string; total: number }> = {};
+        const details: Record<
+          number,
+          { title: string; total: number; subject: string }
+        > = {};
         for (const sub of subs.slice(0, 3)) {
           const row = sheetById.get(sub.sheet_id);
           if (!row) continue;
@@ -303,6 +323,7 @@ export default function DashboardPage() {
           details[sub.sheet_id] = {
             title: row.title,
             total: full?.total_marks ?? 0,
+            subject: row.subject ?? "",
           };
         }
         if (cancelled) return;
@@ -343,9 +364,12 @@ export default function DashboardPage() {
     () =>
       schedules
         .filter((s) => s.exam_date >= localToday())
+        .filter(
+          (s) => subjectFilter === "All" || s.subject === subjectFilter,
+        )
         .sort((a, b) => a.exam_date.localeCompare(b.exam_date))
         .slice(0, 3),
-    [schedules],
+    [schedules, subjectFilter],
   );
 
   const recentResults = useMemo(
@@ -359,6 +383,7 @@ export default function DashboardPage() {
           obtained: score.obtained,
           total: detail?.total ?? 0,
           pct: score.pct,
+          subject: detail?.subject ?? "",
         };
       }),
     [submissions, sheetDetails],
@@ -891,7 +916,7 @@ export default function DashboardPage() {
 
             <div className="space-y-4">
               <Card>
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-sm font-bold text-gray-900">
                     Upcoming exams
                   </h3>
@@ -901,7 +926,28 @@ export default function DashboardPage() {
                     </span>
                   </Link>
                 </div>
-                {upcoming.length === 0 ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {["All", ...SUBJECTS].map((subject) => (
+                    <button
+                      key={subject}
+                      type="button"
+                      onClick={() => setSubjectFilter(subject)}
+                      className={cn(
+                        "rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
+                        subjectFilter === subject
+                          ? "bg-indigo-600 text-white"
+                          : "bg-stone-100 text-stone-600 hover:bg-stone-200",
+                      )}
+                    >
+                      {subject}
+                    </button>
+                  ))}
+                </div>
+                {subjectFilter !== "All" && upcoming.length === 0 ? (
+                  <p className="mt-3 text-sm text-gray-500">
+                    No {subjectFilter} exams announced yet. Check back soon.
+                  </p>
+                ) : upcoming.length === 0 ? (
                   <p className="mt-3 text-sm text-gray-500">
                     No exams announced yet. Check back soon.
                   </p>
@@ -922,15 +968,20 @@ export default function DashboardPage() {
                               {badge.month}
                             </span>
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-gray-900">
                               {s.title}
                             </p>
                             <p className="truncate text-xs text-gray-400">
-                              {s.subject}
-                              {s.start_time ? ` · ${s.start_time}` : ""}
+                              {s.start_time ? `${s.start_time}` : ""}
                             </p>
                           </div>
+                          <Badge
+                            tone={subjectTone(s.subject)}
+                            className="shrink-0"
+                          >
+                            {s.subject}
+                          </Badge>
                         </div>
                       );
                     })}
@@ -956,19 +1007,35 @@ export default function DashboardPage() {
                   </p>
                 ) : (
                   <div className="mt-3 space-y-2">
-                    {recentResults.map(({ sub, title, obtained, total, pct }) => (
-                      <div
-                        key={sub.id}
-                        className="rounded-xl border border-gray-200 p-3"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="min-w-0 truncate text-sm font-semibold text-gray-900">
-                            {title}
-                          </p>
-                          <Badge tone={statusTone(sub.status)} className="shrink-0">
-                            {sub.status === "graded" ? "Graded" : "Submitted"}
-                          </Badge>
-                        </div>
+                    {recentResults.map(
+                      ({ sub, title, obtained, total, pct, subject }) => (
+                        <div
+                          key={sub.id}
+                          className="rounded-xl border border-gray-200 p-3"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <p className="min-w-0 truncate text-sm font-semibold text-gray-900">
+                                {title}
+                              </p>
+                              {subject && (
+                                <Badge
+                                  tone={subjectTone(subject)}
+                                  className="shrink-0"
+                                >
+                                  {subject}
+                                </Badge>
+                              )}
+                            </div>
+                            <Badge
+                              tone={statusTone(sub.status)}
+                              className="shrink-0"
+                            >
+                              {sub.status === "graded"
+                                ? "Graded"
+                                : "Submitted"}
+                            </Badge>
+                          </div>
                         <div className="mt-1 flex items-baseline justify-between gap-2">
                           <span className="text-xs text-gray-400">
                             {obtained} / {total || "?"} marks

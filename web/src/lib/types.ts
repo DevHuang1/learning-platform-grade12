@@ -73,6 +73,8 @@ export type ExamSectionRow = {
   position: number;
   title: string;
   instructions: string;
+  image_path: string | null;
+  image_url: string | null;
 };
 
 export type ExamQuestionRow = {
@@ -84,6 +86,9 @@ export type ExamQuestionRow = {
   marks: number;
   image_path: string | null;
   image_url: string | null;
+  question_type: "multiple_choice" | "short_answer" | "fill_blank" | "true_false";
+  options: string[];
+  correct_option: number;
 };
 
 export type ExamSubmissionRow = {

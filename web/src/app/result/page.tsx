@@ -23,11 +23,13 @@ import {
   fetchSubmissions,
   gradeSubmission,
 } from "@/lib/db";
-import { EXAM_ANSWERS_BUCKET, getPublicUrl } from "@/lib/storage";
+import { QUESTION_TYPE_LABELS } from "@/lib/constants";
+import { EXAM_ANSWERS_BUCKET, getPublicUrl, QUESTION_IMAGES_BUCKET } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import type {
   ExamAnswerRow,
   ExamQuestionRow,
+  ExamSectionRow,
   ExamSubmissionRow,
   ExamWithSections,
 } from "@/lib/types";
@@ -44,6 +46,40 @@ function buildQuestionMap(sheet: ExamWithSections) {
     for (const q of section.questions) map.set(q.id, q);
   }
   return map;
+}
+
+function buildSectionMap(sheet: ExamWithSections) {
+  const map = new Map<number, ExamSectionRow>();
+  for (const section of sheet.sections) {
+    for (const q of section.questions) map.set(q.id, section);
+  }
+  return map;
+}
+
+function isChoiceQuestion(q?: ExamQuestionRow) {
+  return (
+    !!q &&
+    (q.question_type === "multiple_choice" || q.question_type === "true_false")
+  );
+}
+
+function resolveSelectedOption(text: string | null, q?: ExamQuestionRow) {
+  if (!text) return "";
+  if (q && q.options.length > 0) {
+    const idx = Number(text);
+    if (Number.isInteger(idx) && idx >= 0 && idx < q.options.length) {
+      return q.options[idx];
+    }
+    const match = q.options.find((o) => o === text);
+    if (match) return match;
+  }
+  return text;
+}
+
+function correctOptionText(q?: ExamQuestionRow) {
+  if (!q || q.options.length === 0) return null;
+  if (q.correct_option < 0 || q.correct_option >= q.options.length) return null;
+  return q.options[q.correct_option];
 }
 
 function formatDate(iso: string) {
@@ -154,6 +190,14 @@ export default function ResultPage() {
       detail?.sheet
         ? buildQuestionMap(detail.sheet)
         : new Map<number, ExamQuestionRow>(),
+    [detail],
+  );
+
+  const sectionMap = useMemo(
+    () =>
+      detail?.sheet
+        ? buildSectionMap(detail.sheet)
+        : new Map<number, ExamSectionRow>(),
     [detail],
   );
 
@@ -423,6 +467,16 @@ export default function ResultPage() {
             <div className="space-y-4">
               {detail.answers.map((a, i) => {
                 const q = questionMap.get(a.question_id);
+                const section = sectionMap.get(a.question_id);
+                const sectionImgSrc =
+                  section &&
+                  (section.image_path || section.image_url)
+                    ? section.image_url ??
+                      getPublicUrl(
+                        QUESTION_IMAGES_BUCKET,
+                        section.image_path || "",
+                      )
+                    : null;
                 const graded = detail.submission.status === "graded";
                 return (
                   <div
@@ -431,13 +485,31 @@ export default function ResultPage() {
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                          Question {q ? q.position : i + 1} ·{" "}
-                          {q ? q.marks : "?"} marks
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            Question {q ? q.position : i + 1} ·{" "}
+                            {q ? q.marks : "?"} marks
+                          </div>
+                          {q?.question_type ? (
+                            <Badge tone="gray">
+                              {QUESTION_TYPE_LABELS[q.question_type] ??
+                                q.question_type}
+                            </Badge>
+                          ) : null}
                         </div>
                         <p className="mt-1 text-sm font-medium text-gray-900">
                           {q?.prompt ?? "No question prompt available"}
                         </p>
+                        {sectionImgSrc ? (
+                          <div className="mt-2 inline-block rounded-lg border border-gray-200 bg-white">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={sectionImgSrc}
+                              alt="Section image"
+                              className="max-h-40 w-auto rounded-lg border border-gray-200 bg-white object-contain"
+                            />
+                          </div>
+                        ) : null}
                       </div>
                       {graded ? (
                         <Badge
@@ -485,7 +557,24 @@ export default function ResultPage() {
 
                     <div className="mt-3">
                       <AnswerMedia answer={a} />
-                      {a.text_answer ? (
+                      {isChoiceQuestion(q) && a.text_answer ? (
+                        <div className="mt-2 space-y-1">
+                          <p className="text-sm text-gray-600">
+                            <span className="font-semibold text-gray-700">
+                              Answer:{" "}
+                            </span>
+                            {resolveSelectedOption(a.text_answer, q)}
+                          </p>
+                          {isTeacher && correctOptionText(q) ? (
+                            <p className="text-xs text-gray-500">
+                              <span className="font-semibold text-gray-700">
+                                Correct option:{" "}
+                              </span>
+                              {correctOptionText(q)}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : a.text_answer ? (
                         <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600">
                           {a.text_answer}
                         </p>

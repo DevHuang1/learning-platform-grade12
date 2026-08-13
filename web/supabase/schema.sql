@@ -118,8 +118,12 @@ create table if not exists exam_sheet_sections (
   sheet_id bigint not null references exam_sheets(id) on delete cascade,
   position int not null default 0,
   title text not null,
-  instructions text not null default ''
+  instructions text not null default '',
+  image_path text,               -- path inside the bucket
+  image_url text                 -- public URL for display
 );
+alter table exam_sheet_sections add column if not exists image_path text;
+alter table exam_sheet_sections add column if not exists image_url text;
 
 create table if not exists exam_questions (
   id bigserial primary key,
@@ -129,12 +133,19 @@ create table if not exists exam_questions (
   answer_guide text not null default '',
   marks int not null default 1,  -- e.g. 1 / 5 / 10 marks
   image_path text,               -- path inside the bucket
-  image_url text                 -- public URL for display
+  image_url text,                -- public URL for display
+  question_type text not null default 'short_answer',  -- multiple_choice | short_answer | fill_blank | true_false
+  options jsonb not null default '[]'::jsonb,          -- multiple choice options
+  correct_option int not null default 0                -- index of the correct option
 );
 
 -- Migration for databases created before question images existed.
 alter table exam_questions add column if not exists image_path text;
 alter table exam_questions add column if not exists image_url text;
+-- Migration for databases created before question types existed.
+alter table exam_questions add column if not exists question_type text not null default 'short_answer';
+alter table exam_questions add column if not exists options jsonb not null default '[]'::jsonb;
+alter table exam_questions add column if not exists correct_option int not null default 0;
 
 -- ============================================================
 -- Submissions & image answers (images stored in a bucket)
@@ -188,39 +199,61 @@ as $$
 $$;
 
 -- Profile: a user sees themselves; teachers see everyone.
+drop policy if exists "profiles select own" on profiles;
 create policy "profiles select own" on profiles for select using (auth.uid() = id or public.is_teacher());
+drop policy if exists "profiles insert own" on profiles;
 create policy "profiles insert own" on profiles for insert with check (auth.uid() = id);
+drop policy if exists "profiles update own" on profiles;
 create policy "profiles update own" on profiles for update using (auth.uid() = id);
 
 -- Vocab seed data: readable by any authenticated user.
+drop policy if exists "read vocab_units" on vocab_units;
 create policy "read vocab_units" on vocab_units for select to authenticated using (true);
+drop policy if exists "read vocab_words" on vocab_words;
 create policy "read vocab_words" on vocab_words for select to authenticated using (true);
+drop policy if exists "read vocab_sentences" on vocab_sentences;
 create policy "read vocab_sentences" on vocab_sentences for select to authenticated using (true);
 
 -- Quiz history: users manage their own rows.
+drop policy if exists "quiz_history select own" on quiz_history;
 create policy "quiz_history select own" on quiz_history for select using (auth.uid() = user_id);
+drop policy if exists "quiz_history insert own" on quiz_history;
 create policy "quiz_history insert own" on quiz_history for insert with check (auth.uid() = user_id);
+drop policy if exists "quiz_history update own" on quiz_history;
 create policy "quiz_history update own" on quiz_history for update using (auth.uid() = user_id);
+drop policy if exists "quiz_history delete own" on quiz_history;
 create policy "quiz_history delete own" on quiz_history for delete using (auth.uid() = user_id);
 
 -- Exam schedules: everyone reads; teachers write.
+drop policy if exists "read exam_schedules" on exam_schedules;
 create policy "read exam_schedules" on exam_schedules for select to authenticated using (true);
+drop policy if exists "write exam_schedules" on exam_schedules;
 create policy "write exam_schedules" on exam_schedules for all using (public.is_teacher()) with check (public.is_teacher());
 
 -- Exam sheets, sections, questions: everyone reads; teachers write.
+drop policy if exists "read exam_sheets" on exam_sheets;
 create policy "read exam_sheets" on exam_sheets for select to authenticated using (true);
+drop policy if exists "write exam_sheets" on exam_sheets;
 create policy "write exam_sheets" on exam_sheets for all using (public.is_teacher()) with check (public.is_teacher());
+drop policy if exists "read exam_sheet_sections" on exam_sheet_sections;
 create policy "read exam_sheet_sections" on exam_sheet_sections for select to authenticated using (true);
+drop policy if exists "write exam_sheet_sections" on exam_sheet_sections;
 create policy "write exam_sheet_sections" on exam_sheet_sections for all using (public.is_teacher()) with check (public.is_teacher());
+drop policy if exists "read exam_questions" on exam_questions;
 create policy "read exam_questions" on exam_questions for select to authenticated using (true);
+drop policy if exists "write exam_questions" on exam_questions;
 create policy "write exam_questions" on exam_questions for all using (public.is_teacher()) with check (public.is_teacher());
 
 -- Submissions: students see their own; teachers see all.
+drop policy if exists "submissions select own" on exam_submissions;
 create policy "submissions select own" on exam_submissions for select using (auth.uid() = user_id or public.is_teacher());
+drop policy if exists "submissions insert own" on exam_submissions;
 create policy "submissions insert own" on exam_submissions for insert with check (auth.uid() = user_id);
+drop policy if exists "submissions teacher update" on exam_submissions;
 create policy "submissions teacher update" on exam_submissions for update using (public.is_teacher()) with check (public.is_teacher());
 
 -- Answers: students see their own; teachers see all.
+drop policy if exists "answers select own" on exam_answers;
 create policy "answers select own" on exam_answers for select using (
   public.is_teacher()
   or exists (
@@ -228,10 +261,12 @@ create policy "answers select own" on exam_answers for select using (
     where s.id = exam_answers.submission_id and s.user_id = auth.uid()
   )
 );
+drop policy if exists "answers insert own" on exam_answers;
 create policy "answers insert own" on exam_answers for insert with check (
   exists (
     select 1 from exam_submissions s
     where s.id = exam_answers.submission_id and s.user_id = auth.uid()
   )
 );
+drop policy if exists "answers teacher update" on exam_answers;
 create policy "answers teacher update" on exam_answers for update using (public.is_teacher()) with check (public.is_teacher());

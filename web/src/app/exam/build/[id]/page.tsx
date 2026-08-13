@@ -15,6 +15,7 @@ import {
   insertSection,
   updateExamSheet,
 } from "@/lib/db";
+import { QUESTION_TYPES, QUESTION_TYPE_LABELS, SUBJECTS, type QuestionType } from "@/lib/constants";
 import { hasSupabase, supabase } from "@/lib/supabase";
 import { getPublicUrl, QUESTION_IMAGES_BUCKET, removeImage, uploadImage } from "@/lib/storage";
 import type { ExamWithSections } from "@/lib/types";
@@ -23,6 +24,33 @@ const STATUS_TONE: Record<string, "gray" | "green" | "amber"> = {
   draft: "gray",
   published: "green",
   closed: "amber",
+};
+
+type QuestionDraft = {
+  prompt: string;
+  answer_guide: string;
+  marks: string;
+  question_type: QuestionType;
+  options: string[];
+  correct_option: number;
+};
+
+type QuestionPatch = Partial<{
+  prompt: string;
+  answer_guide: string;
+  marks: string;
+  question_type: QuestionType;
+  options: string[];
+  correct_option: number;
+}>;
+
+const DEFAULT_QUESTION_DRAFT: QuestionDraft = {
+  prompt: "",
+  answer_guide: "",
+  marks: "1",
+  question_type: "short_answer",
+  options: ["", ""],
+  correct_option: 0,
 };
 
 function PlusIcon() {
@@ -170,12 +198,8 @@ export default function ExamBuilderPage() {
   const [removalBusy, setRemovalBusy] = useState(false);
   const [addingSection, setAddingSection] = useState(false);
 
-  const [questionDrafts, setQuestionDrafts] = useState<
-    Record<number, { prompt: string; answer_guide: string; marks: string }>
-  >({});
-  const [newQuestions, setNewQuestions] = useState<
-    Record<number, { prompt: string; answer_guide: string; marks: string }>
-  >({});
+  const [questionDrafts, setQuestionDrafts] = useState<Record<number, QuestionDraft>>({});
+  const [newQuestions, setNewQuestions] = useState<Record<number, QuestionDraft>>({});
   const [addingQuestionFor, setAddingQuestionFor] = useState<number | null>(null);
 
   useEffect(() => {
@@ -200,13 +224,16 @@ export default function ExamBuilderPage() {
         setDescription(s.description);
         setDuration(s.duration_minutes);
         setStatus(s.status);
-        const drafts: Record<string, { prompt: string; answer_guide: string; marks: string }> = {};
+        const drafts: Record<string, QuestionDraft> = {};
         for (const sec of s.sections) {
           for (const q of sec.questions) {
             drafts[q.id] = {
               prompt: q.prompt,
               answer_guide: q.answer_guide,
               marks: String(q.marks),
+              question_type: q.question_type,
+              options: q.options,
+              correct_option: q.correct_option,
             };
           }
         }
@@ -283,10 +310,17 @@ export default function ExamBuilderPage() {
       const updated = await fetchExamSheet(sheet.id);
       if (updated) {
         setSheet(updated);
-        const drafts: Record<string, { prompt: string; answer_guide: string; marks: string }> = {};
+        const drafts: Record<string, QuestionDraft> = {};
         for (const sec of updated.sections) {
           for (const q of sec.questions) {
-            drafts[q.id] = { prompt: q.prompt, answer_guide: q.answer_guide, marks: String(q.marks) };
+            drafts[q.id] = {
+              prompt: q.prompt,
+              answer_guide: q.answer_guide,
+              marks: String(q.marks),
+              question_type: q.question_type,
+              options: q.options,
+              correct_option: q.correct_option,
+            };
           }
         }
         setQuestionDrafts(drafts);
@@ -322,7 +356,7 @@ export default function ExamBuilderPage() {
 
   async function handleAddQuestion(sectionId: number) {
     if (!sheet) return;
-    const d = newQuestions[sectionId] || { prompt: "", answer_guide: "", marks: "1" };
+    const d = newQuestions[sectionId] || DEFAULT_QUESTION_DRAFT;
     if (!d.prompt.trim()) return;
     setError(null);
     const section = sheet.sections.find((s) => s.id === sectionId);
@@ -332,19 +366,29 @@ export default function ExamBuilderPage() {
         prompt: d.prompt.trim(),
         answer_guide: d.answer_guide.trim(),
         marks: Math.max(1, Number(d.marks) || 1),
+        question_type: d.question_type,
+        options: d.question_type === "multiple_choice" ? d.options : [],
+        correct_option: d.question_type === "multiple_choice" ? d.correct_option : 0,
       });
       const updated = await fetchExamSheet(sheet.id);
       if (updated) {
         setSheet(updated);
-        const drafts: Record<string, { prompt: string; answer_guide: string; marks: string }> = {};
+        const drafts: Record<string, QuestionDraft> = {};
         for (const sec of updated.sections) {
           for (const q of sec.questions) {
-            drafts[q.id] = { prompt: q.prompt, answer_guide: q.answer_guide, marks: String(q.marks) };
+            drafts[q.id] = {
+              prompt: q.prompt,
+              answer_guide: q.answer_guide,
+              marks: String(q.marks),
+              question_type: q.question_type,
+              options: q.options,
+              correct_option: q.correct_option,
+            };
           }
         }
         setQuestionDrafts(drafts);
       }
-      setNewQuestions((m) => ({ ...m, [sectionId]: { prompt: "", answer_guide: "", marks: "1" } }));
+      setNewQuestions((m) => ({ ...m, [sectionId]: { ...DEFAULT_QUESTION_DRAFT } }));
       setAddingQuestionFor(null);
       toast.success("Question added");
     } catch (e) {
@@ -372,11 +416,11 @@ export default function ExamBuilderPage() {
     }
   }
 
-  function patchQuestion(id: number, patch: Partial<{ prompt: string; answer_guide: string; marks: string }>) {
+  function patchQuestion(id: number, patch: QuestionPatch) {
     setQuestionDrafts((m) => ({ ...m, [id]: { ...m[id], ...patch } }));
   }
 
-  async function persistQuestion(id: number, patch: Partial<{ prompt: string; answer_guide: string; marks: string }>) {
+  async function persistQuestion(id: number, patch: QuestionPatch) {
     if (!hasSupabase()) return;
     try {
       await supabase
@@ -385,6 +429,9 @@ export default function ExamBuilderPage() {
           ...(patch.prompt !== undefined ? { prompt: patch.prompt } : {}),
           ...(patch.answer_guide !== undefined ? { answer_guide: patch.answer_guide } : {}),
           ...(patch.marks !== undefined ? { marks: Math.max(1, Number(patch.marks) || 1) } : {}),
+          ...(patch.question_type !== undefined ? { question_type: patch.question_type } : {}),
+          ...(patch.options !== undefined ? { options: patch.options } : {}),
+          ...(patch.correct_option !== undefined ? { correct_option: patch.correct_option } : {}),
         })
         .eq("id", id);
       setSheet((prev) =>
@@ -400,6 +447,9 @@ export default function ExamBuilderPage() {
                         prompt: patch.prompt !== undefined ? patch.prompt : q.prompt,
                         answer_guide: patch.answer_guide !== undefined ? patch.answer_guide : q.answer_guide,
                         marks: patch.marks !== undefined ? Math.max(1, Number(patch.marks) || 1) : q.marks,
+                        question_type: patch.question_type !== undefined ? patch.question_type : q.question_type,
+                        options: patch.options !== undefined ? patch.options : q.options,
+                        correct_option: patch.correct_option !== undefined ? patch.correct_option : q.correct_option,
                       }
                     : q,
                 ),
@@ -442,6 +492,62 @@ export default function ExamBuilderPage() {
       const message = e instanceof Error ? e.message : "Failed to upload image";
       setError(message);
       toast.error("Failed to upload image", message);
+    }
+  }
+
+  async function handleUploadSectionImage(
+    section: ExamWithSections["sections"][number],
+    file: File,
+  ) {
+    try {
+      const res = await uploadImage(QUESTION_IMAGES_BUCKET, `sheet-${sheet?.id}`, file);
+      if (!("path" in res)) throw new Error(res.error);
+      const image_path = res.path;
+      const image_url = res.publicUrl;
+      await supabase
+        .from("exam_sheet_sections")
+        .update({ image_path, image_url })
+        .eq("id", section.id);
+      setSheet((prev) =>
+        prev
+          ? {
+              ...prev,
+              sections: prev.sections.map((s) =>
+                s.id === section.id ? { ...s, image_path, image_url } : s,
+              ),
+            }
+          : prev,
+      );
+      toast.success("Image uploaded");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to upload image";
+      setError(message);
+      toast.error("Failed to upload image", message);
+    }
+  }
+
+  async function handleRemoveSectionImage(section: ExamWithSections["sections"][number]) {
+    try {
+      await removeImage(QUESTION_IMAGES_BUCKET, section.image_path);
+      await supabase
+        .from("exam_sheet_sections")
+        .update({ image_path: null, image_url: null })
+        .eq("id", section.id);
+      setSheet((prev) =>
+        prev
+          ? {
+              ...prev,
+              sections: prev.sections.map((s) =>
+                s.id === section.id ? { ...s, image_path: null, image_url: null } : s,
+              ),
+            }
+          : prev,
+      );
+      toast.success("Image removed");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to remove image";
+      setError(message);
+      toast.error("Failed to remove image", message);
     }
   }
 
@@ -635,11 +741,20 @@ export default function ExamBuilderPage() {
           </div>
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-500">Subject</label>
-            <input
+            <select
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-            />
+            >
+              {SUBJECTS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+              {subject && !SUBJECTS.some((s) => s === subject) && (
+                <option value={subject}>{subject}</option>
+              )}
+            </select>
           </div>
           <div className="sm:col-span-2">
             <label className="mb-1 block text-xs font-semibold text-gray-500">Description</label>
@@ -684,7 +799,9 @@ export default function ExamBuilderPage() {
         </Card>
       )}
 
-      {sheet.sections.map((section, si) => (
+      {sheet.sections.map((section, si) => {
+        const nd = newQuestions[section.id] || DEFAULT_QUESTION_DRAFT;
+        return (
         <Card key={section.id} className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -705,15 +822,66 @@ export default function ExamBuilderPage() {
           {section.instructions && (
             <p className="mt-1 text-sm text-gray-500">{section.instructions}</p>
           )}
+          {section.image_url || section.image_path ? (
+            <div className="mt-2 overflow-hidden rounded-lg border border-gray-200 bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={section.image_url || (section.image_path ? getPublicUrl(QUESTION_IMAGES_BUCKET, section.image_path) : undefined)}
+                alt="Section image"
+                className="max-h-40 w-full object-contain"
+              />
+              <div className="flex items-center justify-between border-t border-gray-200 px-3 py-1.5">
+                <span className="text-xs font-semibold text-gray-400">Section image</span>
+                {hasSupabase() && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="px-2 py-1 text-xs"
+                    onClick={() => handleRemoveSectionImage(section)}
+                  >
+                    Remove image
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : (
+            hasSupabase() && (
+              <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-500 transition-colors hover:border-indigo-400 hover:text-indigo-600">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (file) handleUploadSectionImage(section, file);
+                  }}
+                />
+                <UploadIcon />
+                Add image
+              </label>
+            )
+          )}
 
           {section.questions.length > 0 && (
             <div className="mt-4 flex flex-col gap-3">
               {section.questions.map((q, qi) => {
-                const d = questionDrafts[q.id] || { prompt: "", answer_guide: "", marks: String(q.marks) };
+                const d =
+                  questionDrafts[q.id] || {
+                    prompt: "",
+                    answer_guide: "",
+                    marks: String(q.marks),
+                    question_type: q.question_type,
+                    options: q.options,
+                    correct_option: q.correct_option,
+                  };
                 return (
                   <div key={q.id} className="rounded-xl border border-gray-200 bg-gray-50 p-3">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="text-xs font-semibold text-gray-400">Q{qi + 1}</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-400">Q{qi + 1}</span>
+                        <Badge tone="indigo">{QUESTION_TYPE_LABELS[d.question_type]}</Badge>
+                      </div>
                       {hasSupabase() && (
                         <Button
                           variant="danger"
@@ -726,6 +894,87 @@ export default function ExamBuilderPage() {
                         </Button>
                       )}
                     </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <label className="text-xs font-semibold text-gray-500">Type:</label>
+                      <select
+                        value={d.question_type}
+                        onChange={(e) => {
+                          const question_type = e.target.value as QuestionType;
+                          patchQuestion(q.id, { question_type });
+                          persistQuestion(q.id, { question_type });
+                        }}
+                        className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                      >
+                        {QUESTION_TYPES.map((t) => (
+                          <option key={t} value={t}>
+                            {QUESTION_TYPE_LABELS[t]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {d.question_type === "multiple_choice" && (
+                      <div className="mt-2 rounded-lg border border-gray-200 bg-white p-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-gray-500">Options</span>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="px-2 py-1 text-xs"
+                            onClick={() => {
+                              const options = [...d.options, ""];
+                              patchQuestion(q.id, { options });
+                              persistQuestion(q.id, { options });
+                            }}
+                          >
+                            <PlusIcon />
+                            Add option
+                          </Button>
+                        </div>
+                        <div className="mt-2 flex flex-col gap-1.5">
+                          {d.options.map((opt, oi) => (
+                            <div key={oi} className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={`correct-${q.id}`}
+                                title="Correct option"
+                                checked={d.correct_option === oi}
+                                onChange={() => {
+                                  patchQuestion(q.id, { correct_option: oi });
+                                  persistQuestion(q.id, { correct_option: oi });
+                                }}
+                                className="h-4 w-4 accent-indigo-600"
+                              />
+                              <input
+                                value={opt}
+                                onChange={(e) => {
+                                  const options = [...d.options];
+                                  options[oi] = e.target.value;
+                                  patchQuestion(q.id, { options });
+                                }}
+                                onBlur={() => persistQuestion(q.id, { options: d.options })}
+                                placeholder={`Option ${oi + 1}`}
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                              />
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                className="px-2 py-1 text-xs"
+                                disabled={d.options.length <= 2}
+                                onClick={() => {
+                                  const options = d.options.filter((_, x) => x !== oi);
+                                  const correct_option = d.correct_option >= options.length ? options.length - 1 : d.correct_option;
+                                  patchQuestion(q.id, { options, correct_option });
+                                  persistQuestion(q.id, { options, correct_option });
+                                }}
+                              >
+                                <TrashIcon />
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {q.image_url || q.image_path ? (
                       <div className="mt-2 overflow-hidden rounded-lg border border-gray-200 bg-white">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -813,18 +1062,117 @@ export default function ExamBuilderPage() {
                 </Button>
               </div>
               <textarea
-                value={(newQuestions[section.id] || {}).prompt || ""}
+                value={nd.prompt}
                 onChange={(e) =>
-                  setNewQuestions((m) => ({ ...m, [section.id]: { ...(m[section.id] || {}), prompt: e.target.value } }))
+                  setNewQuestions((m) => ({
+                    ...m,
+                    [section.id]: { ...(m[section.id] || DEFAULT_QUESTION_DRAFT), prompt: e.target.value },
+                  }))
                 }
                 rows={2}
                 placeholder="Question prompt"
                 className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
               />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <label className="text-xs font-semibold text-gray-500">Type:</label>
+                <select
+                  value={nd.question_type}
+                  onChange={(e) =>
+                    setNewQuestions((m) => ({
+                      ...m,
+                      [section.id]: {
+                        ...(m[section.id] || DEFAULT_QUESTION_DRAFT),
+                        question_type: e.target.value as QuestionType,
+                      },
+                    }))
+                  }
+                  className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  {QUESTION_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {QUESTION_TYPE_LABELS[t]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {nd.question_type === "multiple_choice" && (
+                <div className="mt-2 rounded-lg border border-gray-200 bg-white p-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-gray-500">Options</span>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="px-2 py-1 text-xs"
+                      onClick={() =>
+                        setNewQuestions((m) => {
+                          const prev = m[section.id] || DEFAULT_QUESTION_DRAFT;
+                          return { ...m, [section.id]: { ...prev, options: [...prev.options, ""] } };
+                        })
+                      }
+                    >
+                      <PlusIcon />
+                      Add option
+                    </Button>
+                  </div>
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {nd.options.map((opt, oi) => (
+                      <div key={oi} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name={`new-correct-${section.id}`}
+                          title="Correct option"
+                          checked={nd.correct_option === oi}
+                          onChange={() =>
+                            setNewQuestions((m) => ({
+                              ...m,
+                              [section.id]: { ...(m[section.id] || DEFAULT_QUESTION_DRAFT), correct_option: oi },
+                            }))
+                          }
+                          className="h-4 w-4 accent-indigo-600"
+                        />
+                        <input
+                          value={opt}
+                          onChange={(e) =>
+                            setNewQuestions((m) => {
+                              const prev = m[section.id] || DEFAULT_QUESTION_DRAFT;
+                              const options = [...prev.options];
+                              options[oi] = e.target.value;
+                              return { ...m, [section.id]: { ...prev, options } };
+                            })
+                          }
+                          placeholder={`Option ${oi + 1}`}
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                        />
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="px-2 py-1 text-xs"
+                          disabled={nd.options.length <= 2}
+                          onClick={() =>
+                            setNewQuestions((m) => {
+                              const prev = m[section.id] || DEFAULT_QUESTION_DRAFT;
+                              const options = prev.options.filter((_, x) => x !== oi);
+                              const correct_option =
+                                prev.correct_option >= options.length ? options.length - 1 : prev.correct_option;
+                              return { ...m, [section.id]: { ...prev, options, correct_option } };
+                            })
+                          }
+                        >
+                          <TrashIcon />
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <input
-                value={(newQuestions[section.id] || {}).answer_guide || ""}
+                value={nd.answer_guide}
                 onChange={(e) =>
-                  setNewQuestions((m) => ({ ...m, [section.id]: { ...(m[section.id] || {}), answer_guide: e.target.value } }))
+                  setNewQuestions((m) => ({
+                    ...m,
+                    [section.id]: { ...(m[section.id] || DEFAULT_QUESTION_DRAFT), answer_guide: e.target.value },
+                  }))
                 }
                 placeholder="Answer guide (optional)"
                 className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
@@ -835,16 +1183,19 @@ export default function ExamBuilderPage() {
                   type="number"
                   min={1}
                   step={1}
-                  value={(newQuestions[section.id] || {}).marks || "1"}
+                  value={nd.marks}
                   onChange={(e) =>
-                    setNewQuestions((m) => ({ ...m, [section.id]: { ...(m[section.id] || {}), marks: e.target.value } }))
+                    setNewQuestions((m) => ({
+                      ...m,
+                      [section.id]: { ...(m[section.id] || DEFAULT_QUESTION_DRAFT), marks: e.target.value },
+                    }))
                   }
                   className="w-20 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 />
               </div>
               <Button
                 className="mt-3"
-                disabled={!((newQuestions[section.id] || {}).prompt || "").trim()}
+                disabled={!nd.prompt.trim()}
                 onClick={() => handleAddQuestion(section.id)}
               >
                 <PlusIcon />
@@ -865,7 +1216,8 @@ export default function ExamBuilderPage() {
             )
           )}
         </Card>
-      ))}
+        );
+      })}
 
       {addingSection ? (
         <Card className="border-dashed border-indigo-300 bg-indigo-50">

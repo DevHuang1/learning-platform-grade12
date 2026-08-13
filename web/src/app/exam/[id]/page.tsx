@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
+import { QUESTION_TYPE_LABELS } from "@/lib/constants";
 import { fetchExamSheet, insertAnswer, insertSubmission } from "@/lib/db";
 import {
   ensureBuckets,
@@ -93,6 +94,7 @@ export default function TakeExamPage() {
   const [submissionId, setSubmissionId] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
+  const [currentChoice, setCurrentChoice] = useState("");
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [currentPreview, setCurrentPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -136,12 +138,32 @@ export default function TakeExamPage() {
     setStudentName(localStorage.getItem(NAME_KEY) || "");
   }, []);
 
+  useEffect(() => {
+    setCurrentChoice("");
+  }, [currentIndex]);
+
   const current = flatQuestions[currentIndex];
 
   const questionImageUrl = useMemo(() => {
     if (!current) return null;
     return current.question.image_url || getPublicUrl(QUESTION_IMAGES_BUCKET, current.question.image_path || "");
   }, [current]);
+
+  const sectionImageUrl = useMemo(() => {
+    if (!current) return null;
+    return current.section.image_url || getPublicUrl(QUESTION_IMAGES_BUCKET, current.section.image_path || "");
+  }, [current]);
+
+  const isChoiceType =
+    current?.question.question_type === "multiple_choice" ||
+    current?.question.question_type === "true_false";
+
+  const questionOptions = current
+    ? current.question.question_type === "true_false" &&
+      current.question.options.length === 0
+      ? ["True", "False"]
+      : current.question.options
+    : [];
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -168,7 +190,12 @@ export default function TakeExamPage() {
   async function submitAnswer() {
     const q = current;
     if (!q) return;
-    if (!currentFile && !currentText.trim()) {
+    if (isChoiceType) {
+      if (!currentChoice) {
+        setSubmitError("Select an option to continue.");
+        return;
+      }
+    } else if (!currentFile && !currentText.trim()) {
       setSubmitError("Attach an image of your written answer (or type something).");
       return;
     }
@@ -208,7 +235,9 @@ export default function TakeExamPage() {
         await insertAnswer({
           submission_id: sub.id,
           question_id: q.question.id,
-          text_answer: currentText.trim() || null,
+          text_answer: isChoiceType
+            ? currentChoice || null
+            : currentText.trim() || null,
           image_path: imagePath,
           image_url: imageUrl,
         });
@@ -338,6 +367,16 @@ export default function TakeExamPage() {
           </div>
 
           <Card>
+            {sectionImageUrl ? (
+              <div className="mb-3 overflow-hidden rounded-xl border border-gray-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={sectionImageUrl}
+                  alt="Section image"
+                  className="max-h-72 w-full object-contain bg-gray-50"
+                />
+              </div>
+            ) : null}
             {questionImageUrl ? (
               <div className="mb-3 overflow-hidden rounded-xl border border-gray-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -348,60 +387,139 @@ export default function TakeExamPage() {
                 />
               </div>
             ) : null}
+            <div className="mb-2">
+              <Badge tone="indigo">
+                {QUESTION_TYPE_LABELS[current.question.question_type]}
+              </Badge>
+            </div>
             <p className="whitespace-pre-wrap text-sm text-gray-700">
               {current.question.prompt}
             </p>
           </Card>
 
           <Card>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">
-              Text answer (optional)
-            </label>
-            <textarea
-              value={currentText}
-              onChange={(e) => setCurrentText(e.target.value)}
-              rows={3}
-              placeholder="Type a short answer if you like…"
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-            />
-
-            <div className="mt-4">
-              <label className="mb-1 block text-sm font-semibold text-gray-700">
-                Upload a photo of your written answer
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFile}
-                className="block w-full text-sm text-gray-500 file:mr-3 file:cursor-pointer file:rounded-xl file:border-0 file:bg-indigo-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200"
-              />
-              {currentPreview ? (
-                <div className="mt-3">
-                  <div className="relative overflow-hidden rounded-xl border border-gray-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={currentPreview}
-                      alt="Answer preview"
-                      className="max-h-72 w-full object-contain bg-gray-50"
-                    />
-                    <button
-                      onClick={handleRemoveImage}
-                      aria-label="Remove image"
-                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900/70 text-white transition-colors hover:bg-red-600"
-                    >
-                      <XIcon />
-                    </button>
-                  </div>
-                  <p className="mt-2 text-xs text-gray-400">
-                    Attached image — remove it if you picked the wrong file.
-                  </p>
+            {current.question.question_type === "multiple_choice" ? (
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  Choose one option
+                </label>
+                <div className="flex flex-col gap-2">
+                  {questionOptions.map((opt) => {
+                    const selected = currentChoice === opt;
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setCurrentChoice(opt)}
+                        className={cn(
+                          "rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                          selected
+                            ? "border-indigo-500 bg-indigo-50 text-indigo-900"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-indigo-300 hover:bg-indigo-50/50",
+                        )}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
                 </div>
-              ) : (
-                <p className="mt-2 text-xs text-gray-400">
-                  JPG or PNG — your photo will be stored securely with your answer.
-                </p>
-              )}
-            </div>
+              </div>
+            ) : null}
+
+            {current.question.question_type === "true_false" ? (
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  True or false?
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {questionOptions.map((opt) => {
+                    const selected = currentChoice === opt;
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setCurrentChoice(opt)}
+                        className={cn(
+                          "rounded-xl border px-4 py-4 text-sm font-semibold transition-colors",
+                          selected
+                            ? "border-indigo-500 bg-indigo-50 text-indigo-900"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-indigo-300 hover:bg-indigo-50/50",
+                        )}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
+            {current.question.question_type === "fill_blank" ? (
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  Your answer
+                </label>
+                <input
+                  value={currentText}
+                  onChange={(e) => setCurrentText(e.target.value)}
+                  placeholder="Type the missing word…"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+            ) : null}
+
+            {current.question.question_type === "short_answer" ? (
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  Text answer (optional)
+                </label>
+                <textarea
+                  value={currentText}
+                  onChange={(e) => setCurrentText(e.target.value)}
+                  rows={3}
+                  placeholder="Type a short answer if you like…"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                />
+
+                <div className="mt-4">
+                  <label className="mb-1 block text-sm font-semibold text-gray-700">
+                    Upload a photo of your written answer
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFile}
+                    className="block w-full text-sm text-gray-500 file:mr-3 file:cursor-pointer file:rounded-xl file:border-0 file:bg-indigo-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200"
+                  />
+                  {currentPreview ? (
+                    <div className="mt-3">
+                      <div className="relative overflow-hidden rounded-xl border border-gray-200">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={currentPreview}
+                          alt="Answer preview"
+                          className="max-h-72 w-full object-contain bg-gray-50"
+                        />
+                        <button
+                          onClick={handleRemoveImage}
+                          aria-label="Remove image"
+                          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900/70 text-white transition-colors hover:bg-red-600"
+                        >
+                          <XIcon />
+                        </button>
+                      </div>
+                      <p className="mt-2 text-xs text-gray-400">
+                        Attached image — remove it if you picked the wrong file.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-gray-400">
+                      JPG or PNG — your photo will be stored securely with your answer.
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : null}
 
             {submitError && (
               <p className="mt-3 text-sm font-semibold text-red-600">

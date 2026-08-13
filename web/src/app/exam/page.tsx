@@ -7,7 +7,15 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Badge, Button, Card, EmptyState } from "@/components/ui";
 import { fetchExamSheets, fetchExamSheet } from "@/lib/db";
 import { hasSupabase } from "@/lib/supabase";
+import { SUBJECTS, QUESTION_TYPE_LABELS } from "@/lib/constants";
 import type { ExamWithSections } from "@/lib/types";
+
+const SUBJECT_TONE: Record<string, "green" | "red" | "amber" | "gray" | "indigo"> = {
+  Chemistry: "amber",
+  English: "indigo",
+  Physics: "green",
+  Maths: "gray",
+};
 
 function PlayIcon() {
   return (
@@ -56,20 +64,23 @@ export default function ExamPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [subject, setSubject] = useState("All");
 
   const isTeacher = profile?.role === "teacher";
   const displayName = profile?.full_name || user?.email?.split("@")[0];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return sheets;
-    return sheets.filter(
-      (s) =>
+    return sheets.filter((s) => {
+      if (subject !== "All" && s.subject !== subject) return false;
+      if (!q) return true;
+      return (
         s.title.toLowerCase().includes(q) ||
         s.subject.toLowerCase().includes(q) ||
-        (s.description || "").toLowerCase().includes(q),
-    );
-  }, [sheets, query]);
+        (s.description || "").toLowerCase().includes(q)
+      );
+    });
+  }, [sheets, query, subject]);
 
   useEffect(() => {
     let cancelled = false;
@@ -194,20 +205,38 @@ export default function ExamPage() {
         </div>
       )}
 
+      {!loading && !error && sheets.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {["All", ...SUBJECTS].map((sub) => (
+            <button
+              key={sub}
+              onClick={() => setSubject(sub)}
+              className={
+                subject === sub
+                  ? "rounded-lg border border-indigo-500 bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700"
+                  : "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+              }
+            >
+              {sub}
+            </button>
+          ))}
+        </div>
+      )}
+
       {!loading && !error && filtered.length === 0 && (
         <EmptyState
           title={
-            query.trim()
+            query.trim() || subject !== "All"
               ? "No exams match your search"
               : "No published exams — check back soon"
           }
           description={
-            query.trim()
-              ? "Try a different title or subject keyword."
+            query.trim() || subject !== "All"
+              ? "Try a different title, subject keyword, or filter."
               : "Teachers can build a sheet first, then publish it so students can take it."
           }
           action={
-            isTeacher && !query.trim() ? (
+            isTeacher && !query.trim() && subject === "All" ? (
               <Link href="/exam/build">
                 <Button>Build a Sheet</Button>
               </Link>
@@ -225,7 +254,11 @@ export default function ExamPage() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h3 className="font-bold text-gray-900">{s.title}</h3>
-                <p className="text-sm text-gray-500">{s.subject}</p>
+                {s.subject ? (
+                  <Badge tone={SUBJECT_TONE[s.subject] || "gray"}>
+                    {s.subject}
+                  </Badge>
+                ) : null}
               </div>
               <Badge tone={s.status === "published" ? "green" : "amber"}>
                 {s.status}
@@ -233,6 +266,24 @@ export default function ExamPage() {
             </div>
             {s.description && (
               <p className="text-sm text-gray-600">{s.description}</p>
+            )}
+            {s.sections.some((sec) => sec.questions.length > 0) && (
+              <div className="flex flex-wrap gap-1.5">
+                {Array.from(
+                  new Set(
+                    s.sections.flatMap((sec) =>
+                      sec.questions.map((q) => q.question_type),
+                    ),
+                  ),
+                ).map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
+                  >
+                    {QUESTION_TYPE_LABELS[t]}
+                  </span>
+                ))}
+              </div>
             )}
             <div className="flex flex-wrap gap-2 text-xs text-gray-500">
               <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold">

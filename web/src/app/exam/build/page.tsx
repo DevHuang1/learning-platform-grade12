@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Shell from "@/components/Shell";
@@ -8,12 +8,20 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Badge, Button, Card, ConfirmDialog, EmptyState, StatBox } from "@/components/ui";
 import { deleteExamSheet, fetchExamSheets, insertExamSheet } from "@/lib/db";
 import { hasSupabase } from "@/lib/supabase";
+import { SUBJECTS } from "@/lib/constants";
 import type { ExamSheetRow } from "@/lib/types";
 
 const STATUS_TONE: Record<string, "gray" | "amber" | "green"> = {
   draft: "gray",
   published: "green",
   closed: "amber",
+};
+
+const SUBJECT_TONE: Record<string, "green" | "red" | "amber" | "gray" | "indigo"> = {
+  Chemistry: "amber",
+  English: "indigo",
+  Physics: "green",
+  Maths: "gray",
 };
 
 function PlusIcon() {
@@ -110,10 +118,16 @@ export default function ExamBuildPage() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<ExamSheetRow | null>(null);
   const [deletingBusy, setDeletingBusy] = useState(false);
+  const [subject, setSubject] = useState("All");
 
   const isTeacher = profile?.role === "teacher";
   const publishedCount = sheets.filter((s) => s.status === "published").length;
   const draftCount = sheets.filter((s) => s.status === "draft").length;
+
+  const filtered = useMemo(() => {
+    if (subject === "All") return sheets;
+    return sheets.filter((s) => s.subject === subject);
+  }, [sheets, subject]);
 
   async function load() {
     if (!hasSupabase()) {
@@ -287,6 +301,24 @@ export default function ExamBuildPage() {
         </div>
       ) : (
         <>
+          {sheets.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {["All", ...SUBJECTS].map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => setSubject(sub)}
+                  className={
+                    subject === sub
+                      ? "rounded-lg border border-indigo-500 bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700"
+                      : "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                  }
+                >
+                  {sub}
+                </button>
+              ))}
+            </div>
+          )}
+
           {sheets.length === 0 && (
             <EmptyState
               className="mb-4"
@@ -301,13 +333,25 @@ export default function ExamBuildPage() {
             />
           )}
 
+          {filtered.length === 0 && sheets.length > 0 && (
+            <Card className="mb-4 border-stone-200 bg-stone-50">
+              <p className="text-sm text-gray-600">No sheets in this subject.</p>
+            </Card>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2">
-            {sheets.map((s) => (
+            {filtered.map((s) => (
               <Card key={s.id} className="flex flex-col gap-3 transition-shadow hover:shadow-lg">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-bold text-gray-900">{s.title}</h3>
-                    <p className="text-sm text-gray-500">{s.subject || "No subject"}</p>
+                    {s.subject ? (
+                      <Badge tone={SUBJECT_TONE[s.subject] || "gray"}>
+                        {s.subject}
+                      </Badge>
+                    ) : (
+                      <p className="text-sm text-gray-500">No subject</p>
+                    )}
                   </div>
                   <Badge tone={STATUS_TONE[s.status] || "gray"}>{s.status}</Badge>
                 </div>

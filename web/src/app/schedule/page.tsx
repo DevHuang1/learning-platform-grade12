@@ -6,6 +6,7 @@ import Shell from "@/components/Shell";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/components/toast";
 import { Badge, Button, Card, ConfirmDialog, EmptyState, Spinner } from "@/components/ui";
+import { SUBJECTS } from "@/lib/constants";
 import {
   deleteSchedule,
   fetchSchedules,
@@ -65,6 +66,23 @@ function statusBadge(status: Status) {
   if (status === "today") return <Badge tone="indigo">Today</Badge>;
   if (status === "upcoming") return <Badge tone="amber">Coming soon</Badge>;
   return <Badge tone="gray">Passed</Badge>;
+}
+
+function subjectTone(
+  subject: string,
+): "green" | "red" | "amber" | "gray" | "indigo" {
+  switch (subject) {
+    case "Chemistry":
+      return "amber";
+    case "English":
+      return "indigo";
+    case "Physics":
+      return "green";
+    case "Maths":
+      return "gray";
+    default:
+      return "gray";
+  }
 }
 
 const EMPTY_FORM = {
@@ -309,13 +327,27 @@ export default function SchedulePage() {
                 <span className="mb-1 block text-sm font-semibold text-gray-700">
                   Subject
                 </span>
-                <input
+                <select
                   required
                   value={form.subject}
                   onChange={(e) => setField("subject", e.target.value)}
                   className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  placeholder="e.g. English"
-                />
+                >
+                  {form.subject === "" && (
+                    <option value="" disabled>
+                      Select a subject…
+                    </option>
+                  )}
+                  {form.subject !== "" &&
+                    !(SUBJECTS as readonly string[]).includes(form.subject) && (
+                      <option value={form.subject}>{form.subject}</option>
+                    )}
+                  {SUBJECTS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="block sm:col-span-2">
                 <span className="mb-1 block text-sm font-semibold text-gray-700">
@@ -546,7 +578,9 @@ function ScheduleCard({
             <h3 className="text-base font-bold text-gray-900">
               {schedule.title}
             </h3>
-            <Badge tone="indigo">{schedule.subject}</Badge>
+            <Badge tone={subjectTone(schedule.subject)}>
+              {schedule.subject}
+            </Badge>
             {statusBadge(status)}
           </div>
           <p className="mt-1 text-sm text-gray-500">

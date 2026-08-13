@@ -221,6 +221,9 @@ export async function insertQuestion(sectionId: number, q: {
   marks: number;
   image_path?: string | null;
   image_url?: string | null;
+  question_type?: "multiple_choice" | "short_answer" | "fill_blank" | "true_false";
+  options?: string[];
+  correct_option?: number;
 }) {
   if (!hasSupabase()) return null;
   const { data, error } = await supabase
