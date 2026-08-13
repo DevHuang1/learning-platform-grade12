@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eefaf7;
+  --color-brand-100: #d5f2eb;
+  --color-brand-200: #aae6da;
+  --color-brand-300: #7ad3c3;
+  --color-brand-400: #46b9a6;
+  --color-brand-500: #1f9786;
+  --color-brand-600: #117a6d;
+  --color-brand-700: #0f6c60;
+  --color-brand-800: #0d564d;
+  --color-brand-900: #0b443d;
+  --color-brand-950: #052f2a;
+
+  --color-accent-50: #fdf7e9;
+  --color-accent-100: #fbedcc;
+  --color-accent-200: #f7dc96;
+  --color-accent-300: #f2c75f;
+  --color-accent-400: #e9ad35;
+  --color-accent-500: #d99220;
+  --color-accent-600: #b9721a;
+  --color-accent-700: #945418;
+  --color-accent-800: #7a4319;
+  --color-accent-900: #683818;
+  --color-accent-950: #3b1c0a;
+
+  --color-paper: #faf8f4;
+
+  --color-indigo-50: #eefaf7;
+  --color-indigo-100: #d5f2eb;
+  --color-indigo-200: #aae6da;
+  --color-indigo-300: #7ad3c3;
+  --color-indigo-400: #46b9a6;
+  --color-indigo-500: #1f9786;
+  --color-indigo-600: #117a6d;
+  --color-indigo-700: #0f6c60;
+  --color-indigo-800: #0d564d;
+  --color-indigo-900: #0b443d;
+  --color-indigo-950: #052f2a;
+
+  --color-violet-50: #fdf7e9;
+  --color-violet-100: #fbedcc;
+  --color-violet-200: #f7dc96;
+  --color-violet-300: #f2c75f;
+  --color-violet-400: #e9ad35;
+  --color-violet-500: #d99220;
+  --color-violet-600: #b9721a;
+  --color-violet-700: #945418;
+  --color-violet-800: #7a4319;
+  --color-violet-900: #683818;
+  --color-violet-950: #3b1c0a;
+
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f5f5f4;
+  --color-gray-200: #e7e5e4;
+  --color-gray-300: #d6d3d1;
+  --color-gray-400: #a8a29e;
+  --color-gray-500: #78716c;
+  --color-gray-600: #57534e;
+  --color-gray-700: #44403c;
+  --color-gray-800: #292524;
+  --color-gray-900: #1c1917;
+  --color-gray-950: #0c0a09;
+}
+
+:root {
+  --brand: #117a6d;
+  --brand-dark: #0f6c60;
+  --bg: #faf8f4;
+}
+
+html,
+body {
+  background: var(--bg);
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+}
+
+::selection {
+  background: #117a6d;
+  color: #fff;
+}
