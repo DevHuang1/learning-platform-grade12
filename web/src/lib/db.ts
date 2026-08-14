@@ -9,6 +9,7 @@ import type {
   ExamWithSections,
   ProfileRow,
   QuizHistoryRow,
+  VocabSentenceRow,
   VocabUnitRow,
   VocabWordRow,
 } from "./types";
@@ -80,6 +81,34 @@ export async function fetchVocabWords(unitNumber?: number): Promise<VocabWordRow
   if (unitNumber) q = q.eq("unit_number", unitNumber);
   const { data } = await q;
   return data || [];
+}
+
+export async function fetchVocabSentences(): Promise<VocabSentenceRow[]> {
+  if (!hasSupabase()) return [];
+  const { data } = await supabase
+    .from("vocab_sentences")
+    .select("*")
+    .order("unit_number")
+    .order("n");
+  return data || [];
+}
+
+export async function fetchAllVocab(): Promise<{
+  units: VocabUnitRow[];
+  words: VocabWordRow[];
+  sentences: VocabSentenceRow[];
+} | null> {
+  if (!hasSupabase()) return null;
+  try {
+    const [units, words, sentences] = await Promise.all([
+      fetchVocabUnits(),
+      fetchVocabWords(),
+      fetchVocabSentences(),
+    ]);
+    return { units, words, sentences };
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchSchedules(activeOnly = true): Promise<ExamScheduleRow[]> {

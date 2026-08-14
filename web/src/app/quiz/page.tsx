@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import {
   UNITS,
   getSentence,
+  isVocabLoaded,
+  loadVocab,
   wordsForUnit,
   wordsWithSentences,
   type QuizWord,
@@ -251,10 +253,19 @@ export default function QuizPage() {
   const [stats, setStats] = useState({ correct: 0, total: 0, streak: 0 });
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [cloudHistory, setCloudHistory] = useState<QuizHistoryRow[]>([]);
+  const [vocabReady, setVocabReady] = useState(false);
 
   useEffect(() => {
     setHistory(loadHistory());
-    setQuestion(pickQuestion("all", "blank", "normal"));
+    let cancelled = false;
+    loadVocab().then(() => {
+      if (cancelled) return;
+      setVocabReady(true);
+      setQuestion(pickQuestion("all", "blank", "normal"));
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -527,7 +538,9 @@ export default function QuizPage() {
         </Card>
 
         <Card>
-          {question ? (
+          {!vocabReady ? (
+            <p className="py-4 text-sm text-gray-500">Loading vocabulary…</p>
+          ) : question ? (
             <>
               <div className="flex items-center justify-between gap-2">
                 <Badge tone="indigo">{unitTag}</Badge>
@@ -535,6 +548,11 @@ export default function QuizPage() {
                   {clueLabel}
                 </span>
               </div>
+              {vocabReady && isVocabLoaded() && (
+                <span className="mt-1 block text-[10px] font-medium text-gray-400">
+                  Vocabulary synced from database
+                </span>
+              )}
               <div className="mt-4 space-y-3">
                 {mode === "blank" && question.cloze ? (
                   <>

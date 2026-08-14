@@ -22,6 +22,14 @@ export type VocabWordRow = {
   meaning: string;
 };
 
+export type VocabSentenceRow = {
+  id: number;
+  unit_number: number;
+  n: number;
+  sentence: string;
+  advanced: string;
+};
+
 export type ProfileRow = {
   id: string;
   email: string;

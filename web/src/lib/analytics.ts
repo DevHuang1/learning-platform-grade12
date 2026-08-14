@@ -47,9 +47,12 @@ export function difficultyBreakdown(history: QuizHistoryRow[]) {
 }
 
 /** Per-unit mastery from quiz history (requires unit_number present). */
-export function unitProgress(history: QuizHistoryRow[]): UnitProgress[] {
+export function unitProgress(
+  history: QuizHistoryRow[],
+  unitTitles?: Map<number, string>,
+): UnitProgress[] {
   const map = new Map<number, { total: number; correct: number }>();
-  const titles = new Map<number, string>();
+  const titles = new Map<number, string>(unitTitles);
   for (const h of history) {
     if (!h.unit_number) continue;
     const e = map.get(h.unit_number) || { total: 0, correct: 0 };

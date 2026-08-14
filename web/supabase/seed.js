@@ -21,29 +21,30 @@ const sentences = require("../src/data/sentences.json");
 const advanced = require("../src/data/advanced-sentences.json");
 
 async function main() {
-  console.log("Clearing existing vocab tables…");
-  await supabase.from("vocab_sentences").delete().gte("id", 0);
-  await supabase.from("vocab_words").delete().gte("id", 0);
-  await supabase.from("vocab_units").delete().gte("id", 0);
-
   console.log("Inserting units…");
   for (const u of units) {
-    const { error } = await supabase.from("vocab_units").insert({
-      unit_number: u.unit,
-      title: u.title,
-    });
+    const { error } = await supabase.from("vocab_units").upsert(
+      {
+        unit_number: u.unit,
+        title: u.title,
+      },
+      { onConflict: "unit_number" }
+    );
     if (error) throw error;
   }
 
   console.log("Inserting words…");
   for (const u of units) {
     for (const w of u.words) {
-      const { error } = await supabase.from("vocab_words").insert({
-        unit_number: u.unit,
-        n: w.n,
-        word: w.w,
-        meaning: w.m,
-      });
+      const { error } = await supabase.from("vocab_words").upsert(
+        {
+          unit_number: u.unit,
+          n: w.n,
+          word: w.w,
+          meaning: w.m,
+        },
+        { onConflict: "unit_number,n" }
+      );
       if (error) throw error;
     }
   }
@@ -51,12 +52,15 @@ async function main() {
   console.log("Inserting sentences…");
   for (const key of Object.keys(sentences)) {
     const [unit_number, n] = key.split(".").map(Number);
-    const { error } = await supabase.from("vocab_sentences").insert({
-      unit_number,
-      n,
-      sentence: sentences[key],
-      advanced: advanced[key] || "",
-    });
+    const { error } = await supabase.from("vocab_sentences").upsert(
+      {
+        unit_number,
+        n,
+        sentence: sentences[key],
+        advanced: advanced[key] || "",
+      },
+      { onConflict: "unit_number,n" }
+    );
     if (error) throw error;
   }
 
@@ -65,7 +69,11 @@ async function main() {
     await supabase.storage.createBucket(bucket, { public: true });
   }
 
-  console.log("Seed complete ✓");
+  const wordCount = units.reduce((a, u) => a + u.words.length, 0);
+  const sentenceCount = Object.keys(sentences).length;
+  console.log(
+    `Seed complete ✓ (${units.length} units, ${wordCount} words, ${sentenceCount} sentences)`
+  );
 }
 
 main().catch((e) => {

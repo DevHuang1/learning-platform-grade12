@@ -42,6 +42,7 @@ import {
   fetchQuizHistory,
   fetchSchedules,
   fetchSubmissions,
+  fetchVocabUnits,
 } from "@/lib/db";
 import { hasSupabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
@@ -285,6 +286,7 @@ export default function DashboardPage() {
   const [schedules, setSchedules] = useState<ExamScheduleRow[]>([]);
   const [sheets, setSheets] = useState<ExamSheetRow[]>([]);
   const [submissions, setSubmissions] = useState<ExamSubmissionRow[]>([]);
+  const [unitTitles, setUnitTitles] = useState<Map<number, string> | null>(null);
   const [sheetDetails, setSheetDetails] = useState<
     Record<number, { title: string; total: number; subject: string }>
   >({});
@@ -309,8 +311,9 @@ export default function DashboardPage() {
       fetchSchedules(),
       isTeacher ? fetchSubmissions() : fetchMySubmissions(user.id),
       fetchExamSheets(),
+      fetchVocabUnits(),
     ])
-      .then(async ([hist, scheds, subs, sheetRows]) => {
+      .then(async ([hist, scheds, subs, sheetRows, vocabUnits]) => {
         const sheetById = new Map(sheetRows.map((s) => [s.id, s]));
         const details: Record<
           number,
@@ -332,6 +335,7 @@ export default function DashboardPage() {
         setSubmissions(subs);
         setSheets(sheetRows);
         setSheetDetails(details);
+        setUnitTitles(new Map(vocabUnits.map((u) => [u.unit_number, u.title])));
         setBusy(false);
       })
       .catch(() => {
@@ -358,7 +362,10 @@ export default function DashboardPage() {
       { name: "Meaning", value: m.meaning, color: "#d99220" },
     ];
   }, [history]);
-  const units = useMemo(() => unitProgress(history), [history]);
+  const units = useMemo(
+    () => unitProgress(history, unitTitles ?? undefined),
+    [history, unitTitles],
+  );
 
   const upcoming = useMemo(
     () =>

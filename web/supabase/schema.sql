@@ -28,6 +28,29 @@ create table if not exists vocab_sentences (
   advanced text not null
 );
 
+-- Unique constraints so re-seeding can upsert without duplicates.
+-- Added via DO block because plain Postgres lacks ADD CONSTRAINT IF NOT EXISTS.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'vocab_words_unit_number_n_key'
+      and conrelid = 'vocab_words'::regclass
+  ) then
+    alter table vocab_words add constraint vocab_words_unit_number_n_key unique (unit_number, n);
+  end if;
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'vocab_sentences_unit_number_n_key'
+      and conrelid = 'vocab_sentences'::regclass
+  ) then
+    alter table vocab_sentences add constraint vocab_sentences_unit_number_n_key unique (unit_number, n);
+  end if;
+end $$;
+
+create index if not exists idx_vocab_words_unit on vocab_words(unit_number);
+create index if not exists idx_vocab_sentences_unit on vocab_sentences(unit_number);
+
 -- ============================================================
 -- Users & profiles (Supabase Auth) — role: student | teacher
 -- ============================================================

@@ -1,6 +1,5 @@
 # G12 Learning Platform
 
-Migrated from a single-file quiz app (`index.html`) into an enterprise-style
 Next.js + Supabase learning platform with full authentication and a SaaS
 dashboard. Student-friendly UI with four sections: **Dashboard**, **Quiz**,
 **Exam**, **Result** and **Schedule**.
@@ -24,8 +23,10 @@ dashboard. Student-friendly UI with four sections: **Dashboard**, **Quiz**,
   per-unit mastery, expandable practice history, search + "Make teacher"
   promotion control.
 - **Quiz** (`/quiz`) — the original G12 English vocab quiz (fill-in-the-blank /
-  meaning clue, normal / advanced difficulty, all 12 units, streak). Works
-  fully offline from bundled JSON. Signed-in users get cloud history sync.
+  meaning clue, normal / advanced difficulty, all 12 units, streak). Loads
+  vocabulary from the Supabase DB (`vocab_units` / `vocab_words` /
+  `vocab_sentences`); the bundled JSON is kept only as an offline fallback when
+  Supabase isn't configured. Signed-in users get cloud history sync.
 - **Exam** — fully customizable exam sheets. A sheet is made of sections, and
   both sections and individual questions can carry their own **images**
   (stored in the `question-images` bucket). Every question has a **type** —
@@ -50,10 +51,10 @@ web/
   src/components/   # Shell+sidebar layout, AuthProvider, Card/Button/Badge/StatBox UI kit
   src/lib/          # supabase clients, db access layer, storage uploads (incl. question/section images), analytics, constants (subjects, question types), types
   src/proxy.ts      # route guard middleware (Next 16)
-  src/data/         # vocab + sentences JSON extracted from the original index.html
+  src/data/         # offline fallback / seed source: vocab + sentences JSON
   supabase/
-    schema.sql      # tables + RLS policies (auth-aware, roles; idempotent — safe to re-run)
-    seed.js         # pushes vocab data & creates buckets (needs .env.local)
+    schema.sql      # tables + RLS policies + unique constraints/indexes (auth-aware, roles; idempotent — safe to re-run)
+    seed.js         # idempotently upserts vocab data & creates buckets (needs .env.local)
 ```
 
 ## Getting started
@@ -68,12 +69,16 @@ npm run dev
 1. Create a Supabase project.
 2. Run `supabase/schema.sql` in the SQL editor. This creates tables, the
    `profiles` table (auto-created on sign-up via trigger), and auth-aware RLS
-   policies. Policies are idempotent (`DROP POLICY IF EXISTS` before each
-   `CREATE POLICY`) and new columns use `ADD COLUMN IF NOT EXISTS`, so the file
-   can be re-run safely to apply migrations.
+   policies. It also adds unique constraints on the vocab tables
+   (`vocab_units(unit_number)`, `vocab_words(unit_number, n)`,
+   `vocab_sentences(unit_number, n)`) plus supporting indexes so seeds can
+   upsert without duplicates. Policies are idempotent (`DROP POLICY IF EXISTS`
+   before each `CREATE POLICY`) and new columns use `ADD COLUMN IF NOT EXISTS`,
+   so the file can be re-run safely to apply migrations.
 3. `cd web && node supabase/seed.js` to load the 12 units, 585 words and
    585 normal + 585 advanced sentences, and create the `exam-answers` and
-   `question-images` storage buckets.
+   `question-images` storage buckets. The script upserts, so it's safe to
+   re-run: existing rows are updated, nothing is deleted or duplicated.
 4. Open `http://localhost:3000`. On the register page choose **Student** or
    **Teacher**. Teacher registration requires the **teacher invite code** from
    `NEXT_PUBLIC_TEACHER_INVITE_CODE` (set this to a private value and share it
@@ -85,14 +90,6 @@ npm run dev
 
 Without env vars the app still runs in offline/demo mode (quiz works; auth and
 cloud features show a "Supabase not configured" notice).
-
-## Re-extracting vocab data
-
-If `index.html` changes, regenerate the JSON with:
-
-```bash
-node extract.js   # from the repo root
-```
 
 ## Commands
 
