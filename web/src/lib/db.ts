@@ -25,7 +25,10 @@ export async function fetchProfile(userId: string): Promise<ProfileRow | null> {
   return (data as ProfileRow) || null;
 }
 
-export async function updateProfile(userId: string, patch: Partial<ProfileRow>) {
+export async function updateProfile(
+  userId: string,
+  patch: Partial<ProfileRow>,
+) {
   if (!hasSupabase()) return;
   await supabase.from("profiles").update(patch).eq("id", userId);
 }
@@ -40,13 +43,18 @@ export async function fetchAllStudents(): Promise<ProfileRow[]> {
   return (data as ProfileRow[]) || [];
 }
 
-export async function updateStudentRole(id: string, role: "student" | "teacher") {
+export async function updateStudentRole(
+  id: string,
+  role: "student" | "teacher",
+) {
   if (!hasSupabase()) return;
   await supabase.from("profiles").update({ role }).eq("id", id);
 }
 
 /** All quiz history grouped per user — used by teachers for the students page. */
-export async function fetchAllQuizHistory(limit = 5000): Promise<QuizHistoryRow[]> {
+export async function fetchAllQuizHistory(
+  limit = 5000,
+): Promise<QuizHistoryRow[]> {
   if (!hasSupabase()) return [];
   const { data } = await supabase
     .from("quiz_history")
@@ -71,11 +79,16 @@ export async function fetchSubmissionsForUsers(
 
 export async function fetchVocabUnits(): Promise<VocabUnitRow[]> {
   if (!hasSupabase()) return [];
-  const { data } = await supabase.from("vocab_units").select("*").order("unit_number");
+  const { data } = await supabase
+    .from("vocab_units")
+    .select("*")
+    .order("unit_number");
   return data || [];
 }
 
-export async function fetchVocabWords(unitNumber?: number): Promise<VocabWordRow[]> {
+export async function fetchVocabWords(
+  unitNumber?: number,
+): Promise<VocabWordRow[]> {
   if (!hasSupabase()) return [];
   let q = supabase.from("vocab_words").select("*").order("n");
   if (unitNumber) q = q.eq("unit_number", unitNumber);
@@ -111,7 +124,9 @@ export async function fetchAllVocab(): Promise<{
   }
 }
 
-export async function fetchSchedules(activeOnly = true): Promise<ExamScheduleRow[]> {
+export async function fetchSchedules(
+  activeOnly = true,
+): Promise<ExamScheduleRow[]> {
   if (!hasSupabase()) return [];
   let q = supabase
     .from("exam_schedules")
@@ -141,7 +156,10 @@ export async function insertSchedule(s: {
   return data;
 }
 
-export async function updateSchedule(id: number, patch: Partial<ExamScheduleRow>) {
+export async function updateSchedule(
+  id: number,
+  patch: Partial<ExamScheduleRow>,
+) {
   if (!hasSupabase()) return;
   await supabase.from("exam_schedules").update(patch).eq("id", id);
 }
@@ -152,15 +170,22 @@ export async function deleteSchedule(id: number) {
 }
 
 // ---- Exam sheets ----
-export async function fetchExamSheets(status?: string): Promise<ExamSheetRow[]> {
+export async function fetchExamSheets(
+  status?: string,
+): Promise<ExamSheetRow[]> {
   if (!hasSupabase()) return [];
-  let q = supabase.from("exam_sheets").select("*").order("created_at", { ascending: false });
+  let q = supabase
+    .from("exam_sheets")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (status) q = q.eq("status", status);
   const { data } = await q;
   return data || [];
 }
 
-export async function fetchExamSheet(id: number): Promise<ExamWithSections | null> {
+export async function fetchExamSheet(
+  id: number,
+): Promise<ExamWithSections | null> {
   if (!hasSupabase()) return null;
   const { data: sheet } = await supabase
     .from("exam_sheets")
@@ -197,7 +222,8 @@ export async function fetchExamSheet(id: number): Promise<ExamWithSections | nul
     ...sheet,
     sections: withSections,
     total_marks: withSections.reduce(
-      (acc: number, s) => acc + s.questions.reduce((a: number, q) => a + q.marks, 0),
+      (acc: number, s) =>
+        acc + s.questions.reduce((a: number, q) => a + q.marks, 0),
       0,
     ),
     question_count: questions.length,
@@ -221,7 +247,10 @@ export async function insertExamSheet(sheet: {
   return data;
 }
 
-export async function updateExamSheet(id: number, patch: Partial<ExamSheetRow>) {
+export async function updateExamSheet(
+  id: number,
+  patch: Partial<ExamSheetRow>,
+) {
   if (!hasSupabase()) return;
   await supabase.from("exam_sheets").update(patch).eq("id", id);
 }
@@ -232,28 +261,48 @@ export async function deleteExamSheet(id: number) {
 }
 
 // ---- Sections & questions ----
-export async function insertSection(sheetId: number, title: string, position: number, instructions = "") {
+export async function insertSection(
+  sheetId: number,
+  title: string,
+  position: number,
+  instructions = "",
+  image?: { image_path?: string | null; image_url?: string | null },
+) {
   if (!hasSupabase()) return null;
   const { data, error } = await supabase
     .from("exam_sheet_sections")
-    .insert({ sheet_id: sheetId, title, position, instructions })
+    .insert({
+      sheet_id: sheetId,
+      title,
+      position,
+      instructions,
+      image_path: image?.image_path ?? null,
+      image_url: image?.image_url ?? null,
+    })
     .select()
     .single();
   if (error) throw new Error(error.message);
   return data as ExamSectionRow | null;
 }
 
-export async function insertQuestion(sectionId: number, q: {
-  position: number;
-  prompt: string;
-  answer_guide?: string;
-  marks: number;
-  image_path?: string | null;
-  image_url?: string | null;
-  question_type?: "multiple_choice" | "short_answer" | "fill_blank" | "true_false";
-  options?: string[];
-  correct_option?: number;
-}) {
+export async function insertQuestion(
+  sectionId: number,
+  q: {
+    position: number;
+    prompt: string;
+    answer_guide?: string;
+    marks: number;
+    image_path?: string | null;
+    image_url?: string | null;
+    question_type?:
+      | "multiple_choice"
+      | "short_answer"
+      | "fill_blank"
+      | "true_false";
+    options?: string[];
+    correct_option?: number;
+  },
+) {
   if (!hasSupabase()) return null;
   const { data, error } = await supabase
     .from("exam_questions")
@@ -283,7 +332,12 @@ export async function insertSubmission(s: {
   if (!hasSupabase()) return null;
   const { data, error } = await supabase
     .from("exam_submissions")
-    .insert({ ...s, user_id: s.user_id || null, status: "submitted", obtained_marks: 0 })
+    .insert({
+      ...s,
+      user_id: s.user_id || null,
+      status: "submitted",
+      obtained_marks: 0,
+    })
     .select()
     .single();
   if (error) throw new Error(error.message);
@@ -298,20 +352,32 @@ export async function insertAnswer(a: {
   image_url?: string | null;
 }): Promise<ExamAnswerRow | null> {
   if (!hasSupabase()) return null;
-  const { data, error } = await supabase.from("exam_answers").insert(a).select().single();
+  const { data, error } = await supabase
+    .from("exam_answers")
+    .insert(a)
+    .select()
+    .single();
   if (error) throw new Error(error.message);
   return data;
 }
 
-export async function fetchSubmissions(sheetId?: number): Promise<ExamSubmissionRow[]> {
+export async function fetchSubmissions(
+  sheetId?: number,
+): Promise<ExamSubmissionRow[]> {
   if (!hasSupabase()) return [];
-  let q = supabase.from("exam_submissions").select("*").order("created_at", { ascending: false });
+  let q = supabase
+    .from("exam_submissions")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (sheetId) q = q.eq("sheet_id", sheetId);
   const { data } = await q;
   return (data as ExamSubmissionRow[]) || [];
 }
 
-export async function fetchMySubmissions(userId: string, sheetId?: number): Promise<ExamSubmissionRow[]> {
+export async function fetchMySubmissions(
+  userId: string,
+  sheetId?: number,
+): Promise<ExamSubmissionRow[]> {
   if (!hasSupabase()) return [];
   let q = supabase
     .from("exam_submissions")
@@ -323,7 +389,9 @@ export async function fetchMySubmissions(userId: string, sheetId?: number): Prom
   return (data as ExamSubmissionRow[]) || [];
 }
 
-export async function fetchAnswersForSubmission(submissionId: number): Promise<ExamAnswerRow[]> {
+export async function fetchAnswersForSubmission(
+  submissionId: number,
+): Promise<ExamAnswerRow[]> {
   if (!hasSupabase()) return [];
   const { data } = await supabase
     .from("exam_answers")
@@ -348,7 +416,10 @@ export async function gradeSubmission(
     .from("exam_answers")
     .select("marks_awarded")
     .eq("submission_id", submissionId);
-  const obtained = (full || []).reduce((acc, a) => acc + (a.marks_awarded || 0), 0);
+  const obtained = (full || []).reduce(
+    (acc, a) => acc + (a.marks_awarded || 0),
+    0,
+  );
   await supabase
     .from("exam_submissions")
     .update({ status: "graded", obtained_marks: obtained, graded_by: gradedBy })
@@ -369,10 +440,15 @@ export async function insertQuizHistory(h: {
   difficulty: string;
 }) {
   if (!hasSupabase()) return;
-  await supabase.from("quiz_history").insert({ ...h, user_id: h.user_id || null });
+  await supabase
+    .from("quiz_history")
+    .insert({ ...h, user_id: h.user_id || null });
 }
 
-export async function fetchQuizHistory(limit = 200, userId?: string): Promise<QuizHistoryRow[]> {
+export async function fetchQuizHistory(
+  limit = 200,
+  userId?: string,
+): Promise<QuizHistoryRow[]> {
   if (!hasSupabase()) return [];
   let q = supabase
     .from("quiz_history")

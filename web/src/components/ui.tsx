@@ -20,13 +20,14 @@ export function Card({
 }
 
 const BUTTON_VARIANTS: Record<string, string> = {
-  primary: "bg-ink text-paper hover:bg-ink-2 focus-visible:outline-brand-600",
+  primary:
+    "bg-ink text-cream hover:bg-neutral-800 focus-visible:outline-indigo-700",
   secondary:
-    "border border-stone-300 bg-white text-ink-2 hover:bg-stone-100 focus-visible:outline-stone-400",
+    "border border-neutral-200 bg-white text-ink-2 hover:bg-neutral-100 focus-visible:outline-neutral-400",
   danger:
     "bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600",
   ghost:
-    "bg-transparent text-brand-600 hover:bg-brand-50 focus-visible:outline-brand-600",
+    "bg-transparent text-indigo-700 hover:bg-indigo-50 focus-visible:outline-indigo-700",
   success:
     "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:outline-emerald-600",
 };
@@ -92,7 +93,7 @@ export function Badge({
     red: "bg-red-100 text-red-700",
     amber: "bg-amber-100 text-amber-700",
     gray: "bg-stone-100 text-stone-600",
-    indigo: "bg-brand-100 text-brand-700",
+    indigo: "bg-indigo-100 text-indigo-700",
   };
   return (
     <span
@@ -125,7 +126,9 @@ export function StatBox({
           {icon}
         </div>
       )}
-      <div className={`font-serif text-2xl font-semibold ${accent || "text-stone-900"}`}>
+      <div
+        className={`font-serif text-2xl font-semibold ${accent || "text-stone-900"}`}
+      >
         {value}
       </div>
       <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted">
@@ -211,13 +214,20 @@ export function ConfirmDialog({
         onClick={onClose}
       />
       <div className="relative w-full max-w-sm rounded-none border border-stone-200 bg-white p-5">
-        <h3 className="pr-6 font-serif text-lg font-semibold text-ink">{title}</h3>
+        <h3 className="pr-6 font-serif text-lg font-semibold text-ink">
+          {title}
+        </h3>
         <div className="mt-2 text-sm text-stone-500">{message}</div>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={busy}>
             {cancelLabel}
           </Button>
-          <Button variant={variant} onClick={onConfirm} disabled={busy} autoFocus>
+          <Button
+            variant={variant}
+            onClick={onConfirm}
+            disabled={busy}
+            autoFocus
+          >
             {confirmLabel}
           </Button>
         </div>
@@ -243,7 +253,13 @@ export function ConfirmDialog({
   );
 }
 
-export function Avatar({ name, className }: { name: string; className?: string }) {
+export function Avatar({
+  name,
+  className,
+}: {
+  name: string;
+  className?: string;
+}) {
   const initials = name
     .split(" ")
     .filter(Boolean)
@@ -253,7 +269,7 @@ export function Avatar({ name, className }: { name: string; className?: string }
   return (
     <span
       className={cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-none bg-ink text-xs font-bold text-paper",
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-none bg-ink text-xs font-bold text-cream",
         className,
       )}
     >
