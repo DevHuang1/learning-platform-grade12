@@ -1138,9 +1138,14 @@ export default function ExamBuilderPage() {
                                   title="Correct option"
                                   checked={d.correct_option === oi}
                                   onChange={() => {
-                                    patchQuestion(q.id, { correct_option: oi });
+                                    const answer_guide = d.options[oi] ?? "";
+                                    patchQuestion(q.id, {
+                                      correct_option: oi,
+                                      answer_guide,
+                                    });
                                     persistQuestion(q.id, {
                                       correct_option: oi,
+                                      answer_guide,
                                     });
                                   }}
                                   className="h-4 w-4 accent-indigo-600"
@@ -1150,11 +1155,17 @@ export default function ExamBuilderPage() {
                                   onChange={(e) => {
                                     const options = [...d.options];
                                     options[oi] = e.target.value;
-                                    patchQuestion(q.id, { options });
+                                    const patch: QuestionPatch = { options };
+                                    if (oi === d.correct_option) {
+                                      patch.answer_guide = e.target.value;
+                                    }
+                                    patchQuestion(q.id, patch);
                                   }}
                                   onBlur={() =>
                                     persistQuestion(q.id, {
                                       options: d.options,
+                                      answer_guide:
+                                        d.options[d.correct_option] ?? "",
                                     })
                                   }
                                   placeholder={`Option ${oi + 1}`}
@@ -1173,13 +1184,17 @@ export default function ExamBuilderPage() {
                                       d.correct_option >= options.length
                                         ? options.length - 1
                                         : d.correct_option;
+                                    const answer_guide =
+                                      options[correct_option] ?? "";
                                     patchQuestion(q.id, {
                                       options,
                                       correct_option,
+                                      answer_guide,
                                     });
                                     persistQuestion(q.id, {
                                       options,
                                       correct_option,
+                                      answer_guide,
                                     });
                                   }}
                                 >
@@ -1253,19 +1268,65 @@ export default function ExamBuilderPage() {
                         placeholder="Question prompt"
                         className="w-full border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                       />
-                      <input
-                        value={d.answer_guide}
-                        onChange={(e) =>
-                          patchQuestion(q.id, { answer_guide: e.target.value })
-                        }
-                        onBlur={() =>
-                          persistQuestion(q.id, {
-                            answer_guide: d.answer_guide,
-                          })
-                        }
-                        placeholder="Answer guide (optional)"
-                        className="mt-2 w-full border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                      />
+                      <div className="mt-2">
+                        <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
+                          {d.question_type === "multiple_choice" ||
+                          d.question_type === "true_false"
+                            ? "Correct answer"
+                            : "Answer guide"}
+                        </label>
+                        {d.question_type === "multiple_choice" ? (
+                          <div className="border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-800">
+                            {d.options[d.correct_option] ||
+                              "Select the correct option above"}
+                          </div>
+                        ) : d.question_type === "true_false" ? (
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={
+                                d.options[d.correct_option] ||
+                                (d.correct_option === 1 ? "False" : "True")
+                              }
+                              onChange={(e) => {
+                                const opt = e.target.value;
+                                const correct_option = opt === "True" ? 0 : 1;
+                                patchQuestion(q.id, {
+                                  correct_option,
+                                  answer_guide: opt,
+                                });
+                                persistQuestion(q.id, {
+                                  correct_option,
+                                  answer_guide: opt,
+                                });
+                              }}
+                              className="border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                            >
+                              <option value="True">True</option>
+                              <option value="False">False</option>
+                            </select>
+                            <span className="text-xs text-gray-400">
+                              This is the expected answer for students.
+                            </span>
+                          </div>
+                        ) : (
+                          <textarea
+                            value={d.answer_guide}
+                            onChange={(e) =>
+                              patchQuestion(q.id, {
+                                answer_guide: e.target.value,
+                              })
+                            }
+                            onBlur={() =>
+                              persistQuestion(q.id, {
+                                answer_guide: d.answer_guide,
+                              })
+                            }
+                            rows={2}
+                            placeholder="Enter the correct answer (case-insensitive matching)"
+                            className="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                          />
+                        )}
+                      </div>
                       <div className="mt-2 flex items-center gap-2">
                         <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                           Marks:
@@ -1381,13 +1442,18 @@ export default function ExamBuilderPage() {
                             title="Correct option"
                             checked={nd.correct_option === oi}
                             onChange={() =>
-                              setNewQuestions((m) => ({
-                                ...m,
-                                [section.id]: {
-                                  ...(m[section.id] || DEFAULT_QUESTION_DRAFT),
-                                  correct_option: oi,
-                                },
-                              }))
+                              setNewQuestions((m) => {
+                                const prev =
+                                  m[section.id] || DEFAULT_QUESTION_DRAFT;
+                                return {
+                                  ...m,
+                                  [section.id]: {
+                                    ...prev,
+                                    correct_option: oi,
+                                    answer_guide: prev.options[oi] ?? "",
+                                  },
+                                };
+                              })
                             }
                             className="h-4 w-4 accent-indigo-600"
                           />
@@ -1401,7 +1467,14 @@ export default function ExamBuilderPage() {
                                 options[oi] = e.target.value;
                                 return {
                                   ...m,
-                                  [section.id]: { ...prev, options },
+                                  [section.id]: {
+                                    ...prev,
+                                    options,
+                                    answer_guide:
+                                      oi === prev.correct_option
+                                        ? e.target.value
+                                        : prev.answer_guide,
+                                  },
                                 };
                               })
                             }
@@ -1430,6 +1503,8 @@ export default function ExamBuilderPage() {
                                     ...prev,
                                     options,
                                     correct_option,
+                                    answer_guide:
+                                      options[correct_option] ?? "",
                                   },
                                 };
                               })
@@ -1443,20 +1518,68 @@ export default function ExamBuilderPage() {
                     </div>
                   </div>
                 )}
-                <input
-                  value={nd.answer_guide}
-                  onChange={(e) =>
-                    setNewQuestions((m) => ({
-                      ...m,
-                      [section.id]: {
-                        ...(m[section.id] || DEFAULT_QUESTION_DRAFT),
-                        answer_guide: e.target.value,
-                      },
-                    }))
-                  }
-                  placeholder="Answer guide (optional)"
-                  className="mt-2 w-full border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                />
+                <div className="mt-2">
+                  <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
+                    {nd.question_type === "multiple_choice" ||
+                    nd.question_type === "true_false"
+                      ? "Correct answer"
+                      : "Answer guide"}
+                  </label>
+                  {nd.question_type === "multiple_choice" ? (
+                    <div className="border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-800">
+                      {nd.options[nd.correct_option] ||
+                        "Select the correct option above"}
+                    </div>
+                  ) : nd.question_type === "true_false" ? (
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={
+                          nd.options[nd.correct_option] ||
+                          (nd.correct_option === 1 ? "False" : "True")
+                        }
+                        onChange={(e) =>
+                          setNewQuestions((m) => {
+                            const prev =
+                              m[section.id] || DEFAULT_QUESTION_DRAFT;
+                            const opt = e.target.value;
+                            const correct_option = opt === "True" ? 0 : 1;
+                            return {
+                              ...m,
+                              [section.id]: {
+                                ...prev,
+                                correct_option,
+                                answer_guide: opt,
+                              },
+                            };
+                          })
+                        }
+                        className="border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                      >
+                        <option value="True">True</option>
+                        <option value="False">False</option>
+                      </select>
+                      <span className="text-xs text-gray-400">
+                        This is the expected answer for students.
+                      </span>
+                    </div>
+                  ) : (
+                    <textarea
+                      value={nd.answer_guide}
+                      onChange={(e) =>
+                        setNewQuestions((m) => ({
+                          ...m,
+                          [section.id]: {
+                            ...(m[section.id] || DEFAULT_QUESTION_DRAFT),
+                            answer_guide: e.target.value,
+                          },
+                        }))
+                      }
+                      rows={2}
+                      placeholder="Enter the correct answer (case-insensitive matching)"
+                      className="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                    />
+                  )}
+                </div>
                 <div className="mt-2 flex items-center gap-2">
                   <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                     Marks:
