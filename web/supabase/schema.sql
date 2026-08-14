@@ -244,7 +244,7 @@ create policy "read exam_questions" on exam_questions for select to authenticate
 drop policy if exists "write exam_questions" on exam_questions;
 create policy "write exam_questions" on exam_questions for all using (public.is_teacher()) with check (public.is_teacher());
 
--- Submissions: students see their own; teachers see all.
+-- Submissions: students see their own; teachers see all.push
 drop policy if exists "submissions select own" on exam_submissions;
 create policy "submissions select own" on exam_submissions for select using (auth.uid() = user_id or public.is_teacher());
 drop policy if exists "submissions insert own" on exam_submissions;
