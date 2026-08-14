@@ -103,6 +103,12 @@ export default function TakeExamPage() {
   const [answersSaved, setAnswersSaved] = useState(0);
   const bucketsChecked = useRef(false);
 
+  useEffect(() => {
+    if (hasSupabase()) {
+      ensureBuckets();
+    }
+  }, []);
+
   const signedInName = profile?.full_name || user?.email || "Student";
   const effectiveName = user ? signedInName : studentName;
 
@@ -146,12 +152,18 @@ export default function TakeExamPage() {
 
   const questionImageUrl = useMemo(() => {
     if (!current) return null;
-    return current.question.image_url || getPublicUrl(QUESTION_IMAGES_BUCKET, current.question.image_path || "");
+    return (
+      current.question.image_url ||
+      getPublicUrl(QUESTION_IMAGES_BUCKET, current.question.image_path || "")
+    );
   }, [current]);
 
   const sectionImageUrl = useMemo(() => {
     if (!current) return null;
-    return current.section.image_url || getPublicUrl(QUESTION_IMAGES_BUCKET, current.section.image_path || "");
+    return (
+      current.section.image_url ||
+      getPublicUrl(QUESTION_IMAGES_BUCKET, current.section.image_path || "")
+    );
   }, [current]);
 
   const isChoiceType =
@@ -196,7 +208,9 @@ export default function TakeExamPage() {
         return;
       }
     } else if (!currentFile && !currentText.trim()) {
-      setSubmitError("Attach an image of your written answer (or type something).");
+      setSubmitError(
+        "Attach an image of your written answer (or type something).",
+      );
       return;
     }
     setSubmitting(true);
@@ -253,7 +267,8 @@ export default function TakeExamPage() {
         setCurrentPreview(null);
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Failed to submit answer";
+      const message =
+        e instanceof Error ? e.message : "Failed to submit answer";
       toast.error(
         currentFile ? "Upload failed" : "Submit failed",
         currentFile ? message : undefined,
@@ -304,7 +319,9 @@ export default function TakeExamPage() {
 
       {!user && !studentName ? (
         <Card className="mx-auto max-w-md">
-          <h2 className="font-serif text-lg font-bold text-gray-900">Enter your name</h2>
+          <h2 className="font-serif text-lg font-bold text-gray-900">
+            Enter your name
+          </h2>
           <p className="mt-1 text-sm text-gray-500">{sheet.title}</p>
           <form onSubmit={saveName} className="mt-4 flex flex-col gap-3">
             <input
@@ -313,7 +330,11 @@ export default function TakeExamPage() {
               placeholder="Your full name"
               className="border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             />
-            <Button type="submit" className="w-full" disabled={!studentName.trim()}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!studentName.trim()}
+            >
               Start Exam
             </Button>
           </form>
@@ -323,15 +344,15 @@ export default function TakeExamPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center bg-emerald-100 text-emerald-600">
             <CheckIcon />
           </div>
-          <h2 className="mt-4 font-serif text-lg font-bold text-gray-900">Submitted</h2>
+          <h2 className="mt-4 font-serif text-lg font-bold text-gray-900">
+            Submitted
+          </h2>
           <p className="mt-1 text-sm text-gray-500">
             You answered {answersSaved} of {flatQuestions.length} questions.
           </p>
           <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
             <Link href="/result">
-              <Button size="lg">
-                View your results
-              </Button>
+              <Button size="lg">View your results</Button>
             </Link>
             <Link href="/exam">
               <Button variant="ghost" size="lg">
@@ -343,7 +364,9 @@ export default function TakeExamPage() {
       ) : current ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-serif text-lg font-bold text-gray-900">{sheet.title}</h2>
+            <h2 className="font-serif text-lg font-bold text-gray-900">
+              {sheet.title}
+            </h2>
             <Badge tone="gray">{current.question.marks} marks</Badge>
           </div>
 
@@ -511,7 +534,8 @@ export default function TakeExamPage() {
                     </div>
                   ) : (
                     <p className="mt-2 text-xs text-gray-400">
-                      JPG or PNG — your photo will be stored securely with your answer.
+                      JPG or PNG — your photo will be stored securely with your
+                      answer.
                     </p>
                   )}
                 </div>
@@ -558,7 +582,9 @@ export default function TakeExamPage() {
         </div>
       ) : (
         <Card className="text-center">
-          <p className="text-sm text-gray-500">No questions in this exam yet.</p>
+          <p className="text-sm text-gray-500">
+            No questions in this exam yet.
+          </p>
         </Card>
       )}
     </Shell>

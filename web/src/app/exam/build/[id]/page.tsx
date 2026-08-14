@@ -23,6 +23,7 @@ import {
 } from "@/lib/constants";
 import { hasSupabase, supabase } from "@/lib/supabase";
 import {
+  ensureBuckets,
   getPublicUrl,
   QUESTION_IMAGES_BUCKET,
   removeImage,
@@ -226,6 +227,12 @@ export default function ExamBuilderPage() {
     preview: string;
   } | null>(null);
   const [uploadingNewImage, setUploadingNewImage] = useState(false);
+
+  useEffect(() => {
+    if (hasSupabase()) {
+      ensureBuckets();
+    }
+  }, []);
 
   useEffect(() => {
     if (!isTeacher) {
