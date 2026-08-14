@@ -8,7 +8,15 @@ const TABS = [
     href: "/",
     label: "Quiz",
     icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
       </svg>
@@ -18,7 +26,15 @@ const TABS = [
     href: "/exam",
     label: "Exam",
     icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="3" y="5" width="18" height="14" rx="2" />
         <path d="M3 10h18M8 15h4" />
       </svg>
@@ -28,7 +44,15 @@ const TABS = [
     href: "/result",
     label: "Result",
     icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M3 3v18h18" />
         <path d="M7 14l4-4 3 3 5-6" />
       </svg>
@@ -38,7 +62,15 @@ const TABS = [
     href: "/schedule",
     label: "Schedule",
     icon: (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="3" y="4" width="18" height="18" rx="2" />
         <path d="M16 2v4M8 2v4M3 10h18" />
       </svg>
@@ -58,7 +90,7 @@ export default function TabBar() {
             href={t.href}
             className={`flex flex-1 flex-col items-center gap-1 rounded-none px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors lg:flex-row lg:gap-3 lg:px-4 lg:py-3 ${
               active
-                ? "bg-ink text-paper"
+                ? "bg-ink text-cream"
                 : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"
             }`}
           >

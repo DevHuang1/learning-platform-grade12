@@ -206,16 +206,17 @@ function Hero() {
 
       <div className="wave-container z-20">
         <div className="wave-curve" />
-        <div className="pointer-events-auto absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
-          <Link href="/login">
-            <Button
-              size="lg"
-              className="btn-pulse rounded-full bg-indigo-700 px-8 font-mono text-[11px] uppercase tracking-[0.3em] text-white hover:bg-indigo-800"
-            >
-              Initialize
-            </Button>
-          </Link>
-        </div>
+      </div>
+
+      <div className="absolute bottom-[12vh] left-1/2 z-30 -translate-x-1/2">
+        <Link href="/login">
+          <Button
+            size="lg"
+            className="btn-pulse rounded-full bg-indigo-700 px-8 font-mono text-[11px] uppercase tracking-[0.3em] text-white hover:bg-indigo-800"
+          >
+            Initialize
+          </Button>
+        </Link>
       </div>
     </section>
   );

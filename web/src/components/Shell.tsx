@@ -10,7 +10,12 @@ const NAV = [
   {
     section: "Main",
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: <DashIcon />, match: "/dashboard" },
+      {
+        href: "/dashboard",
+        label: "Dashboard",
+        icon: <DashIcon />,
+        match: "/dashboard",
+      },
     ],
   },
   {
@@ -18,8 +23,18 @@ const NAV = [
     items: [
       { href: "/quiz", label: "Quiz", icon: <QuizIcon />, match: "/quiz" },
       { href: "/exam", label: "Exams", icon: <ExamIcon />, match: "/exam" },
-      { href: "/result", label: "Results", icon: <ResultIcon />, match: "/result" },
-      { href: "/schedule", label: "Schedule", icon: <ScheduleIcon />, match: "/schedule" },
+      {
+        href: "/result",
+        label: "Results",
+        icon: <ResultIcon />,
+        match: "/result",
+      },
+      {
+        href: "/schedule",
+        label: "Schedule",
+        icon: <ScheduleIcon />,
+        match: "/schedule",
+      },
     ],
   },
 ];
@@ -28,8 +43,18 @@ const TEACHER_NAV = [
   {
     section: "Teacher Tools",
     items: [
-      { href: "/exam/build", label: "Exam Builder", icon: <BuildIcon />, match: "/exam/build" },
-      { href: "/students", label: "Students", icon: <StudentIcon />, match: "/students" },
+      {
+        href: "/exam/build",
+        label: "Exam Builder",
+        icon: <BuildIcon />,
+        match: "/exam/build",
+      },
+      {
+        href: "/students",
+        label: "Students",
+        icon: <StudentIcon />,
+        match: "/students",
+      },
     ],
   },
 ];
@@ -59,7 +84,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     };
   }, [sidebarOpen]);
 
-  const displayName = profile?.full_name || user?.email?.split("@")[0] || "Student";
+  const displayName =
+    profile?.full_name || user?.email?.split("@")[0] || "Student";
   const isTeacher = profile?.role === "teacher";
 
   async function handleSignOut() {
@@ -73,9 +99,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-paper">
+    <div className="flex min-h-screen bg-cream">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-stone-200 bg-paper-2 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-neutral-200 bg-white lg:flex">
         <SidebarContent
           displayName={displayName}
           isTeacher={isTeacher}
@@ -91,7 +117,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             className="absolute inset-0 bg-black/40"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-stone-200 bg-paper-2">
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-neutral-200 bg-white">
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
@@ -122,14 +148,21 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       {/* Main column */}
       <div className="flex min-h-screen w-full flex-col lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-stone-200 bg-paper/80 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-stone-200 bg-cream/80 px-4 backdrop-blur sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
               className="shrink-0 rounded-none p-2 text-stone-500 hover:bg-stone-100 lg:hidden"
               aria-label="Open menu"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
                 <path d="M3 12h18M3 6h18M3 18h18" />
               </svg>
             </button>
@@ -138,7 +171,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                 {displayName}
               </p>
               <p className="label truncate text-stone-500">
-                {isTeacher ? "Teacher" : "Student"} · {user?.email || "not signed in"}
+                {isTeacher ? "Teacher" : "Student"} ·{" "}
+                {user?.email || "not signed in"}
               </p>
             </div>
           </div>
@@ -148,7 +182,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="flex h-9 w-9 items-center justify-center rounded-none bg-ink text-sm font-bold text-paper"
+                  className="flex h-9 w-9 items-center justify-center rounded-none bg-ink text-sm font-bold text-cream"
                 >
                   {initials(displayName)}
                 </button>
@@ -163,7 +197,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                         <p className="font-serif text-sm font-semibold text-stone-900">
                           {profile?.full_name || "Student"}
                         </p>
-                        <p className="label truncate text-stone-500">{user.email}</p>
+                        <p className="label truncate text-stone-500">
+                          {user.email}
+                        </p>
                       </div>
                       <button
                         onClick={() => {
@@ -188,9 +224,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          {children}
-        </main>
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
     </div>
   );
@@ -211,14 +245,24 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-stone-200 px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-ink text-paper">
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-ink text-cream">
+          <svg
+            viewBox="0 0 24 24"
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
           </svg>
         </div>
         <div className="min-w-0">
-          <p className="truncate font-serif text-sm font-bold text-stone-900">G12 Learning</p>
+          <p className="truncate font-serif text-sm font-bold text-stone-900">
+            G12 Learning
+          </p>
           <p className="label truncate text-stone-500">{displayName}</p>
         </div>
       </div>
@@ -236,12 +280,12 @@ function SidebarContent({
                     key={item.href}
                     href={item.href}
                     onClick={onNavigate}
-className={cn(
-  "flex items-center gap-3 rounded-none border-l-2 border-transparent px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors",
-  active
-    ? "border-brand-600 bg-transparent text-brand-600"
-    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900",
-)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-none border-l-2 border-transparent px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors",
+                      active
+                        ? "border-indigo-700 bg-indigo-50 text-indigo-700"
+                        : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+                    )}
                   >
                     {item.icon}
                     {item.label}
@@ -253,7 +297,9 @@ className={cn(
         ))}
       </nav>
       <div className="border-t border-stone-200 p-3">
-        <p className="label px-3 py-2 text-stone-500">Study with me · G12 English</p>
+        <p className="label px-3 py-2 text-stone-500">
+          Study with me · G12 English
+        </p>
       </div>
     </div>
   );
@@ -262,7 +308,15 @@ className={cn(
 // Icons
 function DashIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="3" width="7" height="9" rx="1" />
       <rect x="14" y="3" width="7" height="5" rx="1" />
       <rect x="14" y="12" width="7" height="9" rx="1" />
@@ -272,7 +326,15 @@ function DashIcon() {
 }
 function QuizIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="10" />
       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
     </svg>
@@ -280,7 +342,15 @@ function QuizIcon() {
 }
 function ExamIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="M3 10h18M8 15h4" />
     </svg>
@@ -288,7 +358,15 @@ function ExamIcon() {
 }
 function ResultIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 3v18h18" />
       <path d="M7 14l4-4 3 3 5-6" />
     </svg>
@@ -296,7 +374,15 @@ function ResultIcon() {
 }
 function ScheduleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" />
       <path d="M16 2v4M8 2v4M3 10h18" />
     </svg>
@@ -304,7 +390,15 @@ function ScheduleIcon() {
 }
 function BuildIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
     </svg>
@@ -312,7 +406,15 @@ function BuildIcon() {
 }
 function StudentIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
       <path d="M6 12v5c3 3 9 3 12 0v-5" />
     </svg>
