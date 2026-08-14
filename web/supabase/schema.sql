@@ -293,3 +293,39 @@ create policy "answers insert own" on exam_answers for insert with check (
 );
 drop policy if exists "answers teacher update" on exam_answers;
 create policy "answers teacher update" on exam_answers for update using (public.is_teacher()) with check (public.is_teacher());
+
+-- ============================================================
+-- Storage buckets & policies
+-- Browser (anon key) cannot create buckets — that is admin-only.
+-- Create them here so images work immediately after schema is applied.
+-- ============================================================
+insert into storage.buckets (id, name, public)
+values
+  ('question-images', 'question-images', true),
+  ('exam-answers', 'exam-answers', true)
+on conflict (id) do nothing;
+
+-- Storage RLS: images must be readable by any authenticated user.
+drop policy if exists "read question-images" on storage.objects;
+create policy "read question-images" on storage.objects
+  for select to authenticated using (bucket_id = 'question-images');
+
+drop policy if exists "read exam-answers" on storage.objects;
+create policy "read exam-answers" on storage.objects
+  for select to authenticated using (bucket_id = 'exam-answers');
+
+-- Teachers manage question/section images.
+drop policy if exists "teacher write question-images" on storage.objects;
+create policy "teacher write question-images" on storage.objects
+  for insert to authenticated with check (bucket_id = 'question-images' and public.is_teacher());
+drop policy if exists "teacher update question-images" on storage.objects;
+create policy "teacher update question-images" on storage.objects
+  for update to authenticated using (bucket_id = 'question-images' and public.is_teacher()) with check (bucket_id = 'question-images' and public.is_teacher());
+drop policy if exists "teacher delete question-images" on storage.objects;
+create policy "teacher delete question-images" on storage.objects
+  for delete to authenticated using (bucket_id = 'question-images' and public.is_teacher());
+
+-- Students upload their written-answer photos to exam-answers.
+drop policy if exists "student insert exam-answers" on storage.objects;
+create policy "student insert exam-answers" on storage.objects
+  for insert to authenticated with check (bucket_id = 'exam-answers');
