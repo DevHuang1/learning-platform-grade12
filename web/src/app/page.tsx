@@ -181,7 +181,7 @@ function Hero() {
     >
       <MeshBackground />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 pt-32 md:px-10">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 pb-[30vh] pt-28 md:px-10">
         <div
           className={cn(
             "max-w-5xl transition-all duration-1000 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
@@ -191,7 +191,7 @@ function Hero() {
           <p className="label text-indigo-700">
             G12 ENGLISH VOCABULARY · GRADE 12
           </p>
-          <h1 className="mt-8 font-serif text-[11vw] leading-[0.85] tracking-[-0.02em] text-ink md:text-[13vw]">
+          <h1 className="mt-8 max-w-5xl text-balance font-serif text-[clamp(2.75rem,8vw,7rem)] leading-[0.9] tracking-[-0.02em] text-ink">
             The G12 vocabulary{" "}
             <em className="italic text-indigo-700">practice</em> you actually
             finish.
@@ -206,7 +206,7 @@ function Hero() {
 
       <div className="wave-container z-20">
         <div className="wave-curve" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+        <div className="pointer-events-auto absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
           <Link href="/login">
             <Button
               size="lg"
