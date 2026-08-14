@@ -166,7 +166,7 @@ function Hero() {
           System Online
         </span>
         <h1 className="mt-6 max-w-3xl text-balance text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
-          Learning platform for G12 English
+          Learning platform for G12
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
           Twelve themed units, 585 words, and a sentence clue for every one.
@@ -346,8 +346,8 @@ function Footer() {
               Contact
             </p>
             <p className="mt-4 max-w-xs text-sm leading-relaxed">
-              G12 English — built for one classroom, one year, and every word
-              you'll be asked.
+              G12 — built for one classroom, one year, and every word you'll be
+              asked.
             </p>
           </div>
         </div>
