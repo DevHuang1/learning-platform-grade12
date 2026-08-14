@@ -350,6 +350,7 @@ export async function insertAnswer(a: {
   text_answer?: string | null;
   image_path?: string | null;
   image_url?: string | null;
+  marks_awarded?: number;
 }): Promise<ExamAnswerRow | null> {
   if (!hasSupabase()) return null;
   const { data, error } = await supabase

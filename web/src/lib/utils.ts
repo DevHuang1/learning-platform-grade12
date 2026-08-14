@@ -1,4 +1,9 @@
-export { cn } from "@/components/ui";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 // Check if a student's answer matches the expected answer (case-insensitive, ignore whitespace)
 export function checkAnswer(
