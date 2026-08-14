@@ -187,14 +187,14 @@ export default function ExamBuildPage() {
       <Shell>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="h-6 w-40 animate-pulse rounded bg-gray-200" />
-            <div className="mt-1 h-4 w-56 animate-pulse rounded bg-gray-200" />
+            <div className="h-6 w-40 animate-pulse bg-gray-200" />
+            <div className="mt-1 h-4 w-56 animate-pulse bg-gray-200" />
           </div>
-          <div className="h-10 w-32 animate-pulse rounded-xl bg-gray-200" />
+          <div className="h-10 w-32 animate-pulse bg-gray-200" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="h-40 animate-pulse rounded-2xl bg-gray-200" />
-          <div className="h-40 animate-pulse rounded-2xl bg-gray-200" />
+          <div className="h-40 animate-pulse bg-gray-200" />
+          <div className="h-40 animate-pulse bg-gray-200" />
         </div>
       </Shell>
     );
@@ -214,7 +214,7 @@ export default function ExamBuildPage() {
           </Card>
         )}
         <Card className="mx-auto max-w-md text-center">
-          <h2 className="text-lg font-bold text-gray-900">Teachers only</h2>
+          <h2 className="font-serif text-lg font-bold text-gray-900">Teachers only</h2>
           <p className="mt-1 text-sm text-gray-500">
             The exam builder is reserved for teachers. Ask your teacher to sign
             in with a teacher account to create and manage exam sheets.
@@ -233,7 +233,7 @@ export default function ExamBuildPage() {
     <Shell>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Exam Builder</h2>
+          <h2 className="font-serif text-lg font-bold text-gray-900">Exam Builder</h2>
           <p className="text-sm text-gray-500">
             Manage and build exam sheets
           </p>
@@ -294,10 +294,10 @@ export default function ExamBuildPage() {
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="h-40 animate-pulse rounded-2xl bg-gray-200" />
-          <div className="h-40 animate-pulse rounded-2xl bg-gray-200" />
-          <div className="h-40 animate-pulse rounded-2xl bg-gray-200" />
-          <div className="h-40 animate-pulse rounded-2xl bg-gray-200" />
+          <div className="h-40 animate-pulse bg-gray-200" />
+          <div className="h-40 animate-pulse bg-gray-200" />
+          <div className="h-40 animate-pulse bg-gray-200" />
+          <div className="h-40 animate-pulse bg-gray-200" />
         </div>
       ) : (
         <>
@@ -309,8 +309,8 @@ export default function ExamBuildPage() {
                   onClick={() => setSubject(sub)}
                   className={
                     subject === sub
-                      ? "rounded-lg border border-indigo-500 bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700"
-                      : "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                      ? "border border-indigo-500 bg-indigo-50 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-indigo-700"
+                      : "border border-gray-300 bg-white px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-600 hover:bg-gray-50"
                   }
                 >
                   {sub}
@@ -341,10 +341,10 @@ export default function ExamBuildPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             {filtered.map((s) => (
-              <Card key={s.id} className="flex flex-col gap-3 transition-shadow hover:shadow-lg">
+              <Card key={s.id} className="flex flex-col gap-3 transition-colors hover:border-stone-300">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="font-bold text-gray-900">{s.title}</h3>
+                    <h3 className="font-serif font-bold text-gray-900">{s.title}</h3>
                     {s.subject ? (
                       <Badge tone={SUBJECT_TONE[s.subject] || "gray"}>
                         {s.subject}
@@ -356,10 +356,10 @@ export default function ExamBuildPage() {
                   <Badge tone={STATUS_TONE[s.status] || "gray"}>{s.status}</Badge>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                  <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold">
+                  <span className="bg-gray-100 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                     {s.duration_minutes} min
                   </span>
-                  <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold">
+                  <span className="bg-gray-100 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                     {s.created_at ? new Date(s.created_at).toLocaleDateString() : ""}
                   </span>
                 </div>

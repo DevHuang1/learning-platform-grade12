@@ -109,7 +109,7 @@ export default function ExamPage() {
     <Shell>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Exams</h2>
+          <h2 className="font-serif text-lg font-bold text-gray-900">Exams</h2>
           <p className="text-sm text-gray-500">Pick an exam sheet and take it</p>
         </div>
         {isTeacher && (
@@ -200,7 +200,7 @@ export default function ExamPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by title or subject…"
-            className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-9 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="w-full border border-gray-300 bg-white py-2.5 pl-9 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
           />
         </div>
       )}
@@ -213,8 +213,8 @@ export default function ExamPage() {
               onClick={() => setSubject(sub)}
               className={
                 subject === sub
-                  ? "rounded-lg border border-indigo-500 bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700"
-                  : "rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                  ? "border border-indigo-500 bg-indigo-50 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-indigo-700"
+                  : "border border-gray-300 bg-white px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-600 hover:bg-gray-50"
               }
             >
               {sub}
@@ -249,11 +249,11 @@ export default function ExamPage() {
         {filtered.map((s) => (
           <Card
             key={s.id}
-            className="flex flex-col gap-3 transition-shadow hover:shadow-lg"
+            className="flex flex-col gap-3 transition-colors hover:border-stone-300"
           >
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="font-bold text-gray-900">{s.title}</h3>
+                <h3 className="font-serif font-bold text-gray-900">{s.title}</h3>
                 {s.subject ? (
                   <Badge tone={SUBJECT_TONE[s.subject] || "gray"}>
                     {s.subject}
@@ -278,7 +278,7 @@ export default function ExamPage() {
                 ).map((t) => (
                   <span
                     key={t}
-                    className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
+                    className="bg-gray-100 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-gray-500"
                   >
                     {QUESTION_TYPE_LABELS[t]}
                   </span>
@@ -286,10 +286,10 @@ export default function ExamPage() {
               </div>
             )}
             <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold">
+              <span className="bg-gray-100 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                 {s.duration_minutes} min
               </span>
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold">
+              <span className="bg-gray-100 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                 {s.question_count} questions
               </span>
               <Badge tone="indigo">{s.total_marks} marks</Badge>

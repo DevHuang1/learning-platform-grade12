@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-stone-200 bg-white p-5 shadow-sm",
+        "rounded-none border border-stone-200 bg-white p-5",
         className,
       )}
     >
@@ -20,22 +20,21 @@ export function Card({
 }
 
 const BUTTON_VARIANTS: Record<string, string> = {
-  primary:
-    "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 focus-visible:outline-brand-600",
+  primary: "bg-ink text-paper hover:bg-ink-2 focus-visible:outline-brand-600",
   secondary:
-    "bg-white text-stone-700 border border-stone-300 hover:bg-stone-50 active:bg-stone-100 focus-visible:outline-stone-400",
+    "border border-stone-300 bg-white text-ink-2 hover:bg-stone-100 focus-visible:outline-stone-400",
   danger:
-    "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus-visible:outline-red-600",
+    "bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600",
   ghost:
-    "bg-transparent text-brand-600 hover:bg-brand-50 active:bg-brand-100 focus-visible:outline-brand-600",
+    "bg-transparent text-brand-600 hover:bg-brand-50 focus-visible:outline-brand-600",
   success:
-    "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 focus-visible:outline-emerald-600",
+    "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:outline-emerald-600",
 };
 
 const BUTTON_SIZES: Record<string, string> = {
-  sm: "px-3 py-1.5 text-xs",
-  md: "px-4 py-2.5 text-sm",
-  lg: "px-5 py-3 text-base",
+  sm: "px-3 py-1.5",
+  md: "px-4 py-2.5",
+  lg: "px-5 py-3",
 };
 
 export type ButtonVariant = keyof typeof BUTTON_VARIANTS;
@@ -54,7 +53,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-xl font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center justify-center gap-1.5 rounded-none font-mono text-xs uppercase tracking-[0.08em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
         className,
@@ -71,9 +70,10 @@ export function Spinner({ className }: { className?: string }) {
     <span
       aria-hidden="true"
       className={cn(
-        "inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent",
+        "inline-block size-4 animate-spin border-2 border-current border-t-transparent",
         className,
       )}
+      style={{ borderRadius: 9999 }}
     />
   );
 }
@@ -97,7 +97,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+        "inline-flex items-center gap-1 rounded-none px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.09em]",
         tones[tone],
         className,
       )}
@@ -119,16 +119,16 @@ export function StatBox({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-stone-200 bg-white p-4 text-center">
+    <div className="rounded-none border border-stone-200 bg-white p-4 text-center">
       {icon && (
-        <div className="mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-lg bg-stone-50 text-stone-400">
+        <div className="mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-none bg-stone-50 text-stone-400">
           {icon}
         </div>
       )}
-      <div className={`text-2xl font-bold ${accent || "text-stone-900"}`}>
+      <div className={`font-serif text-2xl font-semibold ${accent || "text-stone-900"}`}>
         {value}
       </div>
-      <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+      <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted">
         {label}
       </div>
     </div>
@@ -137,7 +137,7 @@ export function StatBox({
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse rounded-xl bg-stone-200", className)} />
+    <div className={cn("animate-pulse rounded-none bg-stone-200", className)} />
   );
 }
 
@@ -155,11 +155,11 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-200 bg-stone-50/60 px-6 py-10 text-center",
+        "flex flex-col items-center justify-center rounded-none border border-dashed border-stone-300 bg-stone-50/60 px-6 py-10 text-center",
         className,
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-stone-300 shadow-sm">
+      <div className="flex h-12 w-12 items-center justify-center rounded-none bg-white text-stone-300">
         <svg
           viewBox="0 0 24 24"
           className="h-6 w-6"
@@ -210,8 +210,8 @@ export function ConfirmDialog({
         className="absolute inset-0 bg-stone-900/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
-        <h3 className="pr-6 text-lg font-bold text-stone-900">{title}</h3>
+      <div className="relative w-full max-w-sm rounded-none border border-stone-200 bg-white p-5">
+        <h3 className="pr-6 font-serif text-lg font-semibold text-ink">{title}</h3>
         <div className="mt-2 text-sm text-stone-500">{message}</div>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={busy}>
@@ -224,7 +224,7 @@ export function ConfirmDialog({
         <button
           aria-label="Close dialog"
           onClick={onClose}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-none text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
         >
           <svg
             viewBox="0 0 24 24"
@@ -253,7 +253,7 @@ export function Avatar({ name, className }: { name: string; className?: string }
   return (
     <span
       className={cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white",
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-none bg-ink text-xs font-bold text-paper",
         className,
       )}
     >

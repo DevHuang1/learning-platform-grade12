@@ -584,18 +584,18 @@ export default function ExamBuilderPage() {
       <Shell>
         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-200" />
+            <div key={i} className="h-24 animate-pulse bg-gray-200" />
           ))}
         </div>
         <Card className="mb-4">
-          <div className="h-6 w-40 animate-pulse rounded bg-gray-200" />
+          <div className="h-6 w-40 animate-pulse bg-gray-200" />
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-10 animate-pulse rounded-xl bg-gray-200" />
+              <div key={i} className="h-10 animate-pulse bg-gray-200" />
             ))}
           </div>
         </Card>
-        <div className="h-48 animate-pulse rounded-2xl bg-gray-200" />
+        <div className="h-48 animate-pulse bg-gray-200" />
       </Shell>
     );
   }
@@ -614,7 +614,7 @@ export default function ExamBuilderPage() {
           </Card>
         )}
         <Card className="mx-auto max-w-md text-center">
-          <h2 className="text-lg font-bold text-gray-900">Teachers only</h2>
+          <h2 className="font-serif text-lg font-bold text-gray-900">Teachers only</h2>
           <p className="mt-1 text-sm text-gray-500">
             This is the exam builder. You need a teacher account to edit exam
             sheets. Sign in with a teacher account or ask your teacher for help.
@@ -637,18 +637,18 @@ export default function ExamBuilderPage() {
       <Shell>
         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-200" />
+            <div key={i} className="h-24 animate-pulse bg-gray-200" />
           ))}
         </div>
         <Card className="mb-4">
-          <div className="h-6 w-40 animate-pulse rounded bg-gray-200" />
+          <div className="h-6 w-40 animate-pulse bg-gray-200" />
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-10 animate-pulse rounded-xl bg-gray-200" />
+              <div key={i} className="h-10 animate-pulse bg-gray-200" />
             ))}
           </div>
         </Card>
-        <div className="h-48 animate-pulse rounded-2xl bg-gray-200" />
+        <div className="h-48 animate-pulse bg-gray-200" />
       </Shell>
     );
   }
@@ -657,7 +657,7 @@ export default function ExamBuilderPage() {
     return (
       <Shell>
         <Card className="border-red-200 bg-red-50 text-center">
-          <p className="text-lg font-bold text-red-700">{error}</p>
+          <p className="font-serif text-lg font-bold text-red-700">{error}</p>
           <div className="mt-4 flex justify-center gap-2">
             <Link href="/exam/build">
               <Button variant="secondary">Back to Builder</Button>
@@ -677,7 +677,7 @@ export default function ExamBuilderPage() {
     <Shell>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Exam Builder</h2>
+          <h2 className="font-serif text-lg font-bold text-gray-900">Exam Builder</h2>
           <p className="text-sm text-gray-500">Design your custom exam sheet</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -715,7 +715,7 @@ export default function ExamBuilderPage() {
 
       <Card className="mb-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="font-bold text-gray-900">Sheet details</h3>
+          <h3 className="font-serif font-bold text-gray-900">Sheet details</h3>
           <div className="flex items-center gap-2">
             <Badge tone={savedFlash ? "green" : "gray"}>
               {savedFlash ? "Saved" : status}
@@ -732,19 +732,19 @@ export default function ExamBuilderPage() {
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-500">Title</label>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-500">Subject</label>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Subject</label>
             <select
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             >
               {SUBJECTS.map((s) => (
                 <option key={s} value={s}>
@@ -757,30 +757,30 @@ export default function ExamBuilderPage() {
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-semibold text-gray-500">Description</label>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-500">Duration (minutes)</label>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Duration (minutes)</label>
             <input
               type="number"
               min={1}
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-500">Status</label>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Status</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as typeof status)}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
@@ -806,7 +806,7 @@ export default function ExamBuilderPage() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <Badge tone="indigo">Section {si + 1}</Badge>
-              <h3 className="font-bold text-gray-900">{section.title}</h3>
+              <h3 className="font-serif font-bold text-gray-900">{section.title}</h3>
             </div>
             {hasSupabase() && (
               <Button
@@ -823,7 +823,7 @@ export default function ExamBuilderPage() {
             <p className="mt-1 text-sm text-gray-500">{section.instructions}</p>
           )}
           {section.image_url || section.image_path ? (
-            <div className="mt-2 overflow-hidden rounded-lg border border-gray-200 bg-white">
+            <div className="mt-2 overflow-hidden border border-gray-200 bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={section.image_url || (section.image_path ? getPublicUrl(QUESTION_IMAGES_BUCKET, section.image_path) : undefined)}
@@ -831,7 +831,7 @@ export default function ExamBuilderPage() {
                 className="max-h-40 w-full object-contain"
               />
               <div className="flex items-center justify-between border-t border-gray-200 px-3 py-1.5">
-                <span className="text-xs font-semibold text-gray-400">Section image</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-gray-400">Section image</span>
                 {hasSupabase() && (
                   <Button
                     variant="secondary"
@@ -846,7 +846,7 @@ export default function ExamBuilderPage() {
             </div>
           ) : (
             hasSupabase() && (
-              <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-500 transition-colors hover:border-indigo-400 hover:text-indigo-600">
+              <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 border border-dashed border-gray-300 bg-white px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500 transition-colors hover:border-indigo-400 hover:text-indigo-600">
                 <input
                   type="file"
                   accept="image/*"
@@ -876,10 +876,10 @@ export default function ExamBuilderPage() {
                     correct_option: q.correct_option,
                   };
                 return (
-                  <div key={q.id} className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div key={q.id} className="border border-gray-200 bg-gray-50 p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-semibold text-gray-400">Q{qi + 1}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-gray-400">Q{qi + 1}</span>
                         <Badge tone="indigo">{QUESTION_TYPE_LABELS[d.question_type]}</Badge>
                       </div>
                       {hasSupabase() && (
@@ -895,7 +895,7 @@ export default function ExamBuilderPage() {
                       )}
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <label className="text-xs font-semibold text-gray-500">Type:</label>
+                      <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Type:</label>
                       <select
                         value={d.question_type}
                         onChange={(e) => {
@@ -903,7 +903,7 @@ export default function ExamBuilderPage() {
                           patchQuestion(q.id, { question_type });
                           persistQuestion(q.id, { question_type });
                         }}
-                        className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                        className="border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                       >
                         {QUESTION_TYPES.map((t) => (
                           <option key={t} value={t}>
@@ -913,9 +913,9 @@ export default function ExamBuilderPage() {
                       </select>
                     </div>
                     {d.question_type === "multiple_choice" && (
-                      <div className="mt-2 rounded-lg border border-gray-200 bg-white p-2">
+                      <div className="mt-2 border border-gray-200 bg-white p-2">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-gray-500">Options</span>
+                          <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Options</span>
                           <Button
                             variant="secondary"
                             size="sm"
@@ -953,7 +953,7 @@ export default function ExamBuilderPage() {
                                 }}
                                 onBlur={() => persistQuestion(q.id, { options: d.options })}
                                 placeholder={`Option ${oi + 1}`}
-                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                                className="w-full border border-gray-300 bg-white px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                               />
                               <Button
                                 variant="danger"
@@ -976,7 +976,7 @@ export default function ExamBuilderPage() {
                       </div>
                     )}
                     {q.image_url || q.image_path ? (
-                      <div className="mt-2 overflow-hidden rounded-lg border border-gray-200 bg-white">
+                      <div className="mt-2 overflow-hidden border border-gray-200 bg-white">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={q.image_url || (q.image_path ? getPublicUrl(QUESTION_IMAGES_BUCKET, q.image_path) : undefined)}
@@ -984,7 +984,7 @@ export default function ExamBuilderPage() {
                           className="max-h-40 w-full object-contain"
                         />
                         <div className="flex items-center justify-between border-t border-gray-200 px-3 py-1.5">
-                          <span className="text-xs font-semibold text-gray-400">Question image</span>
+                          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-gray-400">Question image</span>
                           {hasSupabase() && (
                             <Button
                               variant="secondary"
@@ -999,7 +999,7 @@ export default function ExamBuilderPage() {
                       </div>
                     ) : (
                       hasSupabase() && (
-                        <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-500 transition-colors hover:border-indigo-400 hover:text-indigo-600">
+                        <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 border border-dashed border-gray-300 bg-white px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500 transition-colors hover:border-indigo-400 hover:text-indigo-600">
                           <input
                             type="file"
                             accept="image/*"
@@ -1021,17 +1021,17 @@ export default function ExamBuilderPage() {
                       onBlur={() => persistQuestion(q.id, { prompt: d.prompt })}
                       rows={2}
                       placeholder="Question prompt"
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                      className="w-full border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                     />
                     <input
                       value={d.answer_guide}
                       onChange={(e) => patchQuestion(q.id, { answer_guide: e.target.value })}
                       onBlur={() => persistQuestion(q.id, { answer_guide: d.answer_guide })}
                       placeholder="Answer guide (optional)"
-                      className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                      className="mt-2 w-full border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                     />
                     <div className="mt-2 flex items-center gap-2">
-                      <label className="text-xs font-semibold text-gray-500">Marks:</label>
+                      <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Marks:</label>
                       <input
                         type="number"
                         min={1}
@@ -1039,7 +1039,7 @@ export default function ExamBuilderPage() {
                         value={d.marks}
                         onChange={(e) => patchQuestion(q.id, { marks: e.target.value })}
                         onBlur={() => persistQuestion(q.id, { marks: d.marks })}
-                        className="w-20 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                        className="w-20 border border-gray-300 bg-white px-2 py-1.5 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                       />
                       <Badge tone="indigo">{d.marks} marks</Badge>
                     </div>
@@ -1050,9 +1050,9 @@ export default function ExamBuilderPage() {
           )}
 
           {addingQuestionFor === section.id ? (
-            <div className="mt-4 rounded-xl border border-dashed border-indigo-300 bg-indigo-50 p-3">
+            <div className="mt-4 border border-dashed border-indigo-300 bg-indigo-50 p-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-indigo-700">New question</span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-indigo-700">New question</span>
                 <Button
                   variant="ghost"
                   className="px-2 py-1 text-xs"
@@ -1071,10 +1071,10 @@ export default function ExamBuilderPage() {
                 }
                 rows={2}
                 placeholder="Question prompt"
-                className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                      className="mt-2 w-full border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
               />
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <label className="text-xs font-semibold text-gray-500">Type:</label>
+                <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Type:</label>
                 <select
                   value={nd.question_type}
                   onChange={(e) =>
@@ -1086,7 +1086,7 @@ export default function ExamBuilderPage() {
                       },
                     }))
                   }
-                  className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  className="border border-gray-300 bg-white px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 >
                   {QUESTION_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -1096,9 +1096,9 @@ export default function ExamBuilderPage() {
                 </select>
               </div>
               {nd.question_type === "multiple_choice" && (
-                <div className="mt-2 rounded-lg border border-gray-200 bg-white p-2">
+                <div className="mt-2 border border-gray-200 bg-white p-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-gray-500">Options</span>
+                    <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Options</span>
                     <Button
                       variant="secondary"
                       size="sm"
@@ -1141,7 +1141,7 @@ export default function ExamBuilderPage() {
                             })
                           }
                           placeholder={`Option ${oi + 1}`}
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                          className="w-full border border-gray-300 bg-white px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                         />
                         <Button
                           variant="danger"
@@ -1175,10 +1175,10 @@ export default function ExamBuilderPage() {
                   }))
                 }
                 placeholder="Answer guide (optional)"
-                className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                className="mt-2 w-full border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
               />
               <div className="mt-2 flex items-center gap-2">
-                <label className="text-xs font-semibold text-gray-500">Marks:</label>
+                <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">Marks:</label>
                 <input
                   type="number"
                   min={1}
@@ -1190,7 +1190,7 @@ export default function ExamBuilderPage() {
                       [section.id]: { ...(m[section.id] || DEFAULT_QUESTION_DRAFT), marks: e.target.value },
                     }))
                   }
-                  className="w-20 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  className="w-20 border border-gray-300 bg-white px-2 py-1.5 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 />
               </div>
               <Button
@@ -1222,7 +1222,7 @@ export default function ExamBuilderPage() {
       {addingSection ? (
         <Card className="border-dashed border-indigo-300 bg-indigo-50">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-indigo-700">New section</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-indigo-700">New section</span>
             <Button variant="ghost" className="px-2 py-1 text-xs" onClick={() => setAddingSection(false)}>
               Cancel
             </Button>
@@ -1231,13 +1231,13 @@ export default function ExamBuilderPage() {
             value={newSectionTitle}
             onChange={(e) => setNewSectionTitle(e.target.value)}
             placeholder="Section title"
-            className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
           />
           <input
             value={newSectionInstructions}
             onChange={(e) => setNewSectionInstructions(e.target.value)}
             placeholder="Instructions (optional)"
-            className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full border border-gray-300 bg-white px-3 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
           />
           <Button className="mt-3" disabled={!newSectionTitle.trim()} onClick={handleAddSection}>
             <PlusIcon />

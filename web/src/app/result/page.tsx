@@ -100,14 +100,14 @@ function AnswerMedia({ answer }: { answer: ExamAnswerRow }) {
 
   if (!src) {
     return (
-      <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-xs font-medium text-gray-400">
+      <div className="flex h-24 items-center justify-center border border-dashed border-gray-300 bg-gray-50 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
         No image answer
       </div>
     );
   }
 
   return (
-    <div className="inline-block max-w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+    <div className="inline-block max-w-full overflow-hidden border border-gray-200 bg-gray-50">
       <img
         src={src}
         alt="Student answer"
@@ -253,8 +253,8 @@ export default function ResultPage() {
   if (!configured) {
     return (
       <Shell>
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-          <p className="text-sm font-semibold text-gray-700">
+        <div className="border border-dashed border-gray-300 bg-white p-10 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.08em] font-semibold text-gray-700">
             Results require Supabase
           </p>
           <p className="mt-1 text-sm text-gray-500">
@@ -277,18 +277,15 @@ export default function ResultPage() {
   if (!user) {
     return (
       <Shell>
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-          <p className="text-sm font-semibold text-gray-700">
+        <div className="border border-dashed border-gray-300 bg-white p-10 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.08em] font-semibold text-gray-700">
             Sign in to view your results
           </p>
           <p className="mt-1 text-sm text-gray-500">
             Your graded exam scores and feedback will appear here.
           </p>
-          <Link
-            href="/login"
-            className="mt-4 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            Go to login
+          <Link href="/login" className="mt-4 inline-block">
+            <Button>Go to login</Button>
           </Link>
         </div>
       </Shell>
@@ -300,7 +297,7 @@ export default function ResultPage() {
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-900">Results</h2>
+            <h2 className="font-serif text-xl font-bold text-gray-900">Results</h2>
             {isTeacher ? (
               <Badge tone="indigo">Teacher view — all students</Badge>
             ) : (
@@ -311,14 +308,14 @@ export default function ResultPage() {
             Exam submissions and scores
           </p>
         </div>
-        <label className="inline-flex max-w-full items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-3 pr-2 shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <label className="inline-flex max-w-full items-center gap-2 border border-gray-200 bg-white py-1.5 pl-3 pr-2">
+          <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
             Exam sheet
           </span>
           <select
             value={selectedSheet}
             onChange={(e) => setSelectedSheet(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm font-medium text-gray-700 focus:outline-2 focus:outline-indigo-600"
+            className="border border-gray-300 bg-white px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] font-medium text-gray-700 focus:outline-2 focus:outline-indigo-600"
           >
             <option value="all">All sheets</option>
             {sheets.map((s) => (
@@ -424,7 +421,7 @@ export default function ResultPage() {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-gray-900">
+                  <h3 className="font-serif text-lg font-bold text-gray-900">
                     {detail.submission.student_name}
                   </h3>
                   <Badge
@@ -444,14 +441,14 @@ export default function ResultPage() {
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-indigo-600">
+                <div className="font-serif text-2xl font-bold text-indigo-600">
                   {detail.submission.obtained_marks}
-                  <span className="text-base font-semibold text-gray-400">
+                  <span className="font-serif text-base font-semibold text-gray-400">
                     {" / "}
                     {detail.sheet?.total_marks ?? "?"}
                   </span>
                 </div>
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
                   Total score
                 </div>
               </div>
@@ -459,7 +456,7 @@ export default function ResultPage() {
 
             <div className="mb-4 flex items-center gap-2 border-b border-gray-100 pb-3">
               <EyeIcon className="h-4 w-4 text-indigo-600" />
-              <h4 className="text-sm font-bold uppercase tracking-wide text-gray-500">
+              <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-gray-500">
                 View answers
               </h4>
             </div>
@@ -481,12 +478,12 @@ export default function ResultPage() {
                 return (
                   <div
                     key={a.id}
-                    className="rounded-xl border border-gray-200 p-4"
+                    className="border border-gray-200 p-4"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                          <div className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
                             Question {q ? q.position : i + 1} ·{" "}
                             {q ? q.marks : "?"} marks
                           </div>
@@ -501,12 +498,12 @@ export default function ResultPage() {
                           {q?.prompt ?? "No question prompt available"}
                         </p>
                         {sectionImgSrc ? (
-                          <div className="mt-2 inline-block rounded-lg border border-gray-200 bg-white">
+                          <div className="mt-2 inline-block border border-gray-200 bg-white">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={sectionImgSrc}
                               alt="Section image"
-                              className="max-h-40 w-auto rounded-lg border border-gray-200 bg-white object-contain"
+                              className="max-h-40 w-auto border border-gray-200 bg-white object-contain"
                             />
                           </div>
                         ) : null}
@@ -525,7 +522,7 @@ export default function ResultPage() {
                         </Badge>
                       ) : isTeacher ? (
                         <div className="flex shrink-0 items-center gap-2">
-                          <label className="text-xs font-semibold text-gray-500">
+                          <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                             Marks
                           </label>
                           <input
@@ -542,14 +539,14 @@ export default function ResultPage() {
                                     : Number(e.target.value),
                               }))
                             }
-                            className="w-20 rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-gray-900 focus:outline-2 focus:outline-indigo-600"
+                            className="w-20 border border-gray-300 px-2 py-1.5 text-sm text-gray-900 focus:outline-2 focus:outline-indigo-600"
                           />
                           <span className="text-xs font-medium text-gray-400">
                             / {q?.marks ?? "?"}
                           </span>
                         </div>
                       ) : (
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
                           Awaiting grading
                         </p>
                       )}
@@ -582,7 +579,7 @@ export default function ResultPage() {
                     </div>
 
                     {graded && a.feedback ? (
-                      <p className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
+                      <p className="mt-2 bg-gray-50 px-3 py-2 text-xs text-gray-600">
                         <span className="font-semibold text-gray-700">
                           Feedback:{" "}
                         </span>
@@ -614,7 +611,7 @@ function ResultSkeleton() {
     <div className="space-y-3">
       {[0, 1, 2].map((i) => (
         <Card key={i} className="flex items-center gap-3">
-          <Skeleton className="h-9 w-9 rounded-full" />
+          <Skeleton className="h-9 w-9" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-3 w-2/3" />

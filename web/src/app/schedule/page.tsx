@@ -245,10 +245,10 @@ export default function SchedulePage() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-bold text-gray-900">
+              <h2 className="font-serif text-lg font-bold text-gray-900">
                 Upcoming Exams
               </h2>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
+              <span className="inline-flex items-center gap-1.5 bg-indigo-100 px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em] text-indigo-700">
                 <CalendarIcon className="h-3.5 w-3.5" />
                 {upcoming.length} upcoming
               </span>
@@ -276,7 +276,7 @@ export default function SchedulePage() {
         )}
 
         {configured && authLoading === false && isTeacher && (
-          <div className="mb-4 flex items-start gap-2 rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-3 text-sm text-gray-500">
+          <div className="mb-4 flex items-start gap-2 border border-dashed border-gray-300 bg-white px-4 py-3 text-sm text-gray-500">
             <PlusIcon className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
             Teachers can manage schedules here — use the button above to open
             the form.
@@ -290,11 +290,11 @@ export default function SchedulePage() {
             </p>
             <p className="mt-1 text-sm text-amber-700">
               Exam schedules need Supabase. Set{" "}
-              <code className="rounded bg-amber-100 px-1">
+              <code className="bg-amber-100 px-1">
                 NEXT_PUBLIC_SUPABASE_URL
               </code>{" "}
               and{" "}
-              <code className="rounded bg-amber-100 px-1">
+              <code className="bg-amber-100 px-1">
                 NEXT_PUBLIC_SUPABASE_ANON_KEY
               </code>{" "}
               to see exam announcements.
@@ -304,7 +304,7 @@ export default function SchedulePage() {
 
         {manageOpen && configured && isTeacher && (
           <Card className="mb-6">
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="font-serif text-base font-bold text-gray-900">
               {editingId != null ? "Edit schedule" : "Add a schedule"}
             </h3>
             <p className="mb-4 text-sm text-gray-500">
@@ -312,26 +312,26 @@ export default function SchedulePage() {
             </p>
             <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-gray-700">
+                <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Title
                 </span>
                 <input
                   required
                   value={form.title}
                   onChange={(e) => setField("title", e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                   placeholder="e.g. Unit 5 Mock Test"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-gray-700">
+                <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Subject
                 </span>
                 <select
                   required
                   value={form.subject}
                   onChange={(e) => setField("subject", e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
                   {form.subject === "" && (
                     <option value="" disabled>
@@ -350,7 +350,7 @@ export default function SchedulePage() {
                 </select>
               </label>
               <label className="block sm:col-span-2">
-                <span className="mb-1 block text-sm font-semibold text-gray-700">
+                <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Announcement
                 </span>
                 <textarea
@@ -358,12 +358,12 @@ export default function SchedulePage() {
                   value={form.announcement}
                   onChange={(e) => setField("announcement", e.target.value)}
                   rows={3}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                   placeholder="Details students need to know before the exam…"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-gray-700">
+                <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Date
                 </span>
                 <input
@@ -371,40 +371,40 @@ export default function SchedulePage() {
                   type="date"
                   value={form.exam_date}
                   onChange={(e) => setField("exam_date", e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-gray-700">
+                <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Location
                 </span>
                 <input
                   value={form.location}
                   onChange={(e) => setField("location", e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                   placeholder="e.g. Room 4B"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-gray-700">
+                <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Start time
                 </span>
                 <input
                   type="time"
                   value={form.start_time}
                   onChange={(e) => setField("start_time", e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-gray-700">
+                <span className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   End time
                 </span>
                 <input
                   type="time"
                   value={form.end_time}
                   onChange={(e) => setField("end_time", e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 />
               </label>
               <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
@@ -472,7 +472,7 @@ export default function SchedulePage() {
             )}
             {past.length > 0 && (
               <div className="mt-8">
-                <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-400">
+                <h3 className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-gray-400">
                   Past Exams
                 </h3>
                 <div className="space-y-4 opacity-70">
@@ -527,14 +527,14 @@ function ScheduleSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-2xl border border-gray-200 bg-white p-5"
+          className="animate-pulse border border-gray-200 bg-white p-5"
         >
           <div className="flex gap-4">
-            <div className="h-16 w-16 shrink-0 rounded-xl bg-gray-200" />
+            <div className="h-16 w-16 shrink-0 bg-gray-200" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-2/3 rounded bg-gray-200" />
-              <div className="h-3 w-1/3 rounded bg-gray-200" />
-              <div className="h-16 rounded-xl bg-indigo-50" />
+              <div className="h-4 w-2/3 bg-gray-200" />
+              <div className="h-3 w-1/3 bg-gray-200" />
+              <div className="h-16 bg-indigo-50" />
             </div>
           </div>
         </div>
@@ -567,15 +567,15 @@ function ScheduleCard({
   return (
     <Card className="relative">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-          <span className="text-lg font-bold leading-none">{badge.day}</span>
-          <span className="mt-0.5 text-xs font-semibold uppercase">
+        <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center bg-ink text-paper">
+          <span className="font-serif text-lg font-bold leading-none">{badge.day}</span>
+          <span className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.08em]">
             {badge.month}
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="font-serif text-base font-bold text-gray-900">
               {schedule.title}
             </h3>
             <Badge tone={subjectTone(schedule.subject)}>
@@ -597,8 +597,8 @@ function ScheduleCard({
             )}
             {schedule.location && <> · {schedule.location}</>}
           </p>
-          <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
-            <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-indigo-700">
+          <div className="mt-3 border border-indigo-100 bg-indigo-50 px-4 py-3">
+            <p className="mb-1 flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-indigo-700">
               <MegaphoneIcon className="h-3.5 w-3.5" />
               Announcement
             </p>

@@ -10,7 +10,7 @@ const NAV = [
   {
     section: "Main",
     items: [
-      { href: "/", label: "Dashboard", icon: <DashIcon />, match: "/" },
+      { href: "/dashboard", label: "Dashboard", icon: <DashIcon />, match: "/dashboard" },
     ],
   },
   {
@@ -69,14 +69,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   }
 
   function isActive(item: { match: string; href: string }) {
-    if (item.match === "/") return pathname === "/";
-    return pathname.startsWith(item.match);
+    return pathname === item.match || pathname.startsWith(item.match + "/");
   }
 
   return (
     <div className="flex min-h-screen bg-paper">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-stone-200 bg-stone-50 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-stone-200 bg-paper-2 lg:flex">
         <SidebarContent
           displayName={displayName}
           isTeacher={isTeacher}
@@ -92,12 +91,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             className="absolute inset-0 bg-black/40"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-stone-200 bg-stone-50">
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-stone-200 bg-paper-2">
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close menu"
-              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-stone-500 transition-colors hover:bg-stone-100"
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-none text-stone-500 transition-colors hover:bg-stone-100"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -123,11 +122,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       {/* Main column */}
       <div className="flex min-h-screen w-full flex-col lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-stone-200 bg-white/80 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-stone-200 bg-paper/80 px-4 backdrop-blur sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="shrink-0 rounded-lg p-2 text-stone-500 hover:bg-stone-100 lg:hidden"
+              className="shrink-0 rounded-none p-2 text-stone-500 hover:bg-stone-100 lg:hidden"
               aria-label="Open menu"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -135,10 +134,10 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               </svg>
             </button>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold leading-tight text-stone-900">
+              <p className="truncate font-serif text-sm font-bold leading-tight text-stone-900">
                 {displayName}
               </p>
-              <p className="truncate text-xs text-stone-500">
+              <p className="label truncate text-stone-500">
                 {isTeacher ? "Teacher" : "Student"} · {user?.email || "not signed in"}
               </p>
             </div>
@@ -149,7 +148,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white hover:bg-brand-700"
+                  className="flex h-9 w-9 items-center justify-center rounded-none bg-ink text-sm font-bold text-paper"
                 >
                   {initials(displayName)}
                 </button>
@@ -159,25 +158,25 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                       className="fixed inset-0 z-10"
                       onClick={() => setMenuOpen(false)}
                     />
-                    <div className="absolute right-0 z-20 mt-2 w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg">
+                    <div className="absolute right-0 z-20 mt-2 w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-none border border-stone-200 bg-white">
                       <div className="border-b border-stone-100 px-4 py-3">
-                        <p className="text-sm font-semibold text-stone-900">
+                        <p className="font-serif text-sm font-semibold text-stone-900">
                           {profile?.full_name || "Student"}
                         </p>
-                        <p className="truncate text-xs text-stone-500">{user.email}</p>
+                        <p className="label truncate text-stone-500">{user.email}</p>
                       </div>
                       <button
                         onClick={() => {
                           setMenuOpen(false);
                           router.push("/schedule");
                         }}
-                        className="block w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+                        className="block w-full px-4 py-2.5 text-left font-mono text-[11px] uppercase tracking-[0.08em] text-stone-700 hover:bg-stone-50"
                       >
                         Schedule
                       </button>
                       <button
                         onClick={handleSignOut}
-                        className="block w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                        className="block w-full px-4 py-2.5 text-left font-mono text-[11px] uppercase tracking-[0.08em] text-red-600 hover:bg-red-50"
                       >
                         Sign out
                       </button>
@@ -212,21 +211,21 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-stone-200 px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-ink text-paper">
           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
           </svg>
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-stone-900">G12 Learning</p>
-          <p className="truncate text-xs text-stone-500">{displayName}</p>
+          <p className="truncate font-serif text-sm font-bold text-stone-900">G12 Learning</p>
+          <p className="label truncate text-stone-500">{displayName}</p>
         </div>
       </div>
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
         {groups.map((g) => (
           <div key={g.section}>
-            <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+            <p className="mb-1.5 px-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-stone-400">
               {g.section}
             </p>
             <div className="space-y-0.5">
@@ -237,12 +236,12 @@ function SidebarContent({
                     key={item.href}
                     href={item.href}
                     onClick={onNavigate}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-brand-50 text-brand-700"
-                        : "text-stone-600 hover:bg-stone-100 hover:text-stone-900",
-                    )}
+className={cn(
+  "flex items-center gap-3 rounded-none border-l-2 border-transparent px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors",
+  active
+    ? "border-brand-600 bg-transparent text-brand-600"
+    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900",
+)}
                   >
                     {item.icon}
                     {item.label}
@@ -254,7 +253,7 @@ function SidebarContent({
         ))}
       </nav>
       <div className="border-t border-stone-200 p-3">
-        <p className="px-3 py-2 text-xs text-stone-400">Study with me · G12 English</p>
+        <p className="label px-3 py-2 text-stone-500">Study with me · G12 English</p>
       </div>
     </div>
   );

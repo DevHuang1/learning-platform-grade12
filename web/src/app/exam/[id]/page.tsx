@@ -304,14 +304,14 @@ export default function TakeExamPage() {
 
       {!user && !studentName ? (
         <Card className="mx-auto max-w-md">
-          <h2 className="text-lg font-bold text-gray-900">Enter your name</h2>
+          <h2 className="font-serif text-lg font-bold text-gray-900">Enter your name</h2>
           <p className="mt-1 text-sm text-gray-500">{sheet.title}</p>
           <form onSubmit={saveName} className="mt-4 flex flex-col gap-3">
             <input
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
               placeholder="Your full name"
-              className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             />
             <Button type="submit" className="w-full" disabled={!studentName.trim()}>
               Start Exam
@@ -320,19 +320,16 @@ export default function TakeExamPage() {
         </Card>
       ) : finished ? (
         <Card className="mx-auto max-w-md text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center bg-emerald-100 text-emerald-600">
             <CheckIcon />
           </div>
-          <h2 className="mt-4 text-lg font-bold text-gray-900">Submitted</h2>
+          <h2 className="mt-4 font-serif text-lg font-bold text-gray-900">Submitted</h2>
           <p className="mt-1 text-sm text-gray-500">
             You answered {answersSaved} of {flatQuestions.length} questions.
           </p>
           <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
             <Link href="/result">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-950 hover:from-amber-500 hover:to-yellow-500"
-              >
+              <Button size="lg">
                 View your results
               </Button>
             </Link>
@@ -346,20 +343,20 @@ export default function TakeExamPage() {
       ) : current ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-bold text-gray-900">{sheet.title}</h2>
+            <h2 className="font-serif text-lg font-bold text-gray-900">{sheet.title}</h2>
             <Badge tone="gray">{current.question.marks} marks</Badge>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+            <span className="bg-indigo-100 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-indigo-700">
               Question {currentIndex + 1} of {flatQuestions.length}
             </span>
             <Badge tone="amber">{current.section.title}</Badge>
           </div>
 
-          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+          <div className="h-2 w-full overflow-hidden bg-gray-200">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-500 transition-all"
+              className="h-full bg-ink transition-all"
               style={{
                 width: `${((currentIndex + 1) / flatQuestions.length) * 100}%`,
               }}
@@ -368,7 +365,7 @@ export default function TakeExamPage() {
 
           <Card>
             {sectionImageUrl ? (
-              <div className="mb-3 overflow-hidden rounded-xl border border-gray-200">
+              <div className="mb-3 overflow-hidden border border-gray-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={sectionImageUrl}
@@ -378,7 +375,7 @@ export default function TakeExamPage() {
               </div>
             ) : null}
             {questionImageUrl ? (
-              <div className="mb-3 overflow-hidden rounded-xl border border-gray-200">
+              <div className="mb-3 overflow-hidden border border-gray-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={questionImageUrl}
@@ -400,7 +397,7 @@ export default function TakeExamPage() {
           <Card>
             {current.question.question_type === "multiple_choice" ? (
               <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Choose one option
                 </label>
                 <div className="flex flex-col gap-2">
@@ -412,7 +409,7 @@ export default function TakeExamPage() {
                         type="button"
                         onClick={() => setCurrentChoice(opt)}
                         className={cn(
-                          "rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                          "border px-4 py-3 text-left text-sm transition-colors",
                           selected
                             ? "border-indigo-500 bg-indigo-50 text-indigo-900"
                             : "border-gray-300 bg-white text-gray-700 hover:border-indigo-300 hover:bg-indigo-50/50",
@@ -428,7 +425,7 @@ export default function TakeExamPage() {
 
             {current.question.question_type === "true_false" ? (
               <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   True or false?
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -440,7 +437,7 @@ export default function TakeExamPage() {
                         type="button"
                         onClick={() => setCurrentChoice(opt)}
                         className={cn(
-                          "rounded-xl border px-4 py-4 text-sm font-semibold transition-colors",
+                          "border px-4 py-4 text-sm font-semibold transition-colors",
                           selected
                             ? "border-indigo-500 bg-indigo-50 text-indigo-900"
                             : "border-gray-300 bg-white text-gray-700 hover:border-indigo-300 hover:bg-indigo-50/50",
@@ -456,21 +453,21 @@ export default function TakeExamPage() {
 
             {current.question.question_type === "fill_blank" ? (
               <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Your answer
                 </label>
                 <input
                   value={currentText}
                   onChange={(e) => setCurrentText(e.target.value)}
                   placeholder="Type the missing word…"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 />
               </div>
             ) : null}
 
             {current.question.question_type === "short_answer" ? (
               <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
+                <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                   Text answer (optional)
                 </label>
                 <textarea
@@ -478,22 +475,22 @@ export default function TakeExamPage() {
                   onChange={(e) => setCurrentText(e.target.value)}
                   rows={3}
                   placeholder="Type a short answer if you like…"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 />
 
                 <div className="mt-4">
-                  <label className="mb-1 block text-sm font-semibold text-gray-700">
+                  <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
                     Upload a photo of your written answer
                   </label>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleFile}
-                    className="block w-full text-sm text-gray-500 file:mr-3 file:cursor-pointer file:rounded-xl file:border-0 file:bg-indigo-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200"
+                    className="block w-full text-sm text-gray-500 file:mr-3 file:cursor-pointer file:border-0 file:bg-indigo-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200"
                   />
                   {currentPreview ? (
                     <div className="mt-3">
-                      <div className="relative overflow-hidden rounded-xl border border-gray-200">
+                      <div className="relative overflow-hidden border border-gray-200">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={currentPreview}
@@ -503,7 +500,7 @@ export default function TakeExamPage() {
                         <button
                           onClick={handleRemoveImage}
                           aria-label="Remove image"
-                          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900/70 text-white transition-colors hover:bg-red-600"
+                          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center bg-gray-900/70 text-white transition-colors hover:bg-red-600"
                         >
                           <XIcon />
                         </button>

@@ -31,7 +31,7 @@ const TONES: Record<Toast["tone"], { icon: React.ReactNode; ring: string }> = {
         <path d="M20 6 9 17l-5-5" />
       </svg>
     ),
-    ring: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    ring: "border-emerald-200 text-emerald-700",
   },
   error: {
     icon: (
@@ -39,7 +39,7 @@ const TONES: Record<Toast["tone"], { icon: React.ReactNode; ring: string }> = {
         <path d="M18 6 6 18M6 6l12 12" />
       </svg>
     ),
-    ring: "border-red-200 bg-red-50 text-red-800",
+    ring: "border-red-200 text-red-700",
   },
   info: {
     icon: (
@@ -48,7 +48,7 @@ const TONES: Record<Toast["tone"], { icon: React.ReactNode; ring: string }> = {
         <path d="M12 16v-4M12 8h.01" />
       </svg>
     ),
-    ring: "border-indigo-200 bg-indigo-50 text-indigo-800",
+    ring: "border-indigo-200 text-indigo-700",
   },
 };
 
@@ -87,15 +87,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             onClick={() => dismiss(t.id)}
             className={cn(
-              "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border px-4 py-3 text-left shadow-lg backdrop-blur transition-all",
+              "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-none border border-stone-200 bg-white px-4 py-3 text-left transition-colors",
               TONES[t.tone].ring,
             )}
           >
             <span className="mt-0.5 shrink-0">{TONES[t.tone].icon}</span>
             <span className="min-w-0">
-              <span className="block text-sm font-semibold">{t.title}</span>
+              <span className="block text-xs font-mono uppercase tracking-[0.08em] text-ink">
+                {t.title}
+              </span>
               {t.description && (
-                <span className="mt-0.5 block text-xs leading-5 opacity-80">
+                <span className="mt-1 block text-[11px] font-mono leading-[1.9] text-muted">
                   {t.description}
                 </span>
               )}

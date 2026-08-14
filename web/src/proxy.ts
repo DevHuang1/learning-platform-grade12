@@ -29,18 +29,27 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Authenticated users are sent away from login.
-  if (user && PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p))) {
-    return NextResponse.redirect(new URL("/", request.url));
+  const pathname = request.nextUrl.pathname;
+
+  // Authenticated users are sent away from the landing page and the public
+  // auth paths, straight into the app.
+  if (
+    user &&
+    (pathname === "/" ||
+      PUBLIC_PATHS.some((p) => pathname.startsWith(p)))
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Unauthenticated users are redirected to login for protected routes.
+  // Unauthenticated users are redirected to login for protected routes; the
+  // landing page at "/" stays public for everyone.
   if (
     !user &&
-    !PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p))
+    pathname !== "/" &&
+    !PUBLIC_PATHS.some((p) => pathname.startsWith(p))
   ) {
     return NextResponse.redirect(
-      new URL("/login?next=" + encodeURIComponent(request.nextUrl.pathname), request.url),
+      new URL("/login?next=" + encodeURIComponent(pathname), request.url),
     );
   }
 

@@ -73,7 +73,7 @@ function Cell({
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">
+      <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400 md:hidden">
         {label}
       </p>
       {children}
@@ -211,9 +211,9 @@ export default function StudentsPage() {
           <p className="text-sm font-semibold text-amber-800">Supabase is not configured</p>
           <p className="mt-1 text-sm leading-6 text-amber-700">
             Student analytics need a Supabase backend. Add{" "}
-            <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-            <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to
-            your <code className="rounded bg-amber-100 px-1">.env.local</code> file, then restart
+            <code className="bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code className="bg-amber-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to
+            your <code className="bg-amber-100 px-1">.env.local</code> file, then restart
             the dev server.
           </p>
         </Card>
@@ -237,13 +237,13 @@ export default function StudentsPage() {
           <Card className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                <Skeleton className="h-10 w-10 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="mt-2 h-3 w-1/2" />
                 </div>
                 <Skeleton className="hidden h-4 w-16 md:block" />
-                <Skeleton className="hidden h-8 w-24 rounded-xl md:block" />
+                <Skeleton className="hidden h-8 w-24 md:block" />
               </div>
             ))}
           </Card>
@@ -257,7 +257,7 @@ export default function StudentsPage() {
       <Shell>
         <div className="flex min-h-[60vh] items-center justify-center">
           <Card className="w-full max-w-sm text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center bg-ink text-paper">
               <svg
                 viewBox="0 0 24 24"
                 className="h-6 w-6"
@@ -271,7 +271,7 @@ export default function StudentsPage() {
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
             </div>
-            <h2 className="mt-4 text-lg font-bold text-gray-900">Please sign in</h2>
+            <h2 className="mt-4 font-serif text-lg font-bold text-gray-900">Please sign in</h2>
             <p className="mt-1 text-sm text-gray-500">
               Sign in with a teacher account to view and manage your students.
             </p>
@@ -288,7 +288,7 @@ export default function StudentsPage() {
     return (
       <Shell>
         <Card className="mx-auto max-w-md text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center bg-gray-100 text-gray-400">
             <svg
               viewBox="0 0 24 24"
               className="h-6 w-6"
@@ -302,7 +302,7 @@ export default function StudentsPage() {
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
           </div>
-          <h2 className="mt-4 text-lg font-bold text-gray-900">Teachers only</h2>
+          <h2 className="mt-4 font-serif text-lg font-bold text-gray-900">Teachers only</h2>
           <p className="mt-1 text-sm text-gray-500">
             This page is for managing students. Ask your teacher to sign in with a teacher
             account.
@@ -322,7 +322,7 @@ export default function StudentsPage() {
       <div className="space-y-6">
         <section className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">Students</h1>
+            <h1 className="font-serif text-2xl font-bold tracking-tight text-gray-900">Students</h1>
             <p className="mt-1 text-sm text-gray-500">
               {students.length} students enrolled · {activeTodayCount} active today
             </p>
@@ -344,7 +344,7 @@ export default function StudentsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or email..."
-              className="w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-9 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 sm:text-sm"
+              className="w-full border border-gray-300 bg-white py-2.5 pl-9 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 sm:text-sm"
             />
           </div>
         </section>
@@ -399,14 +399,14 @@ export default function StudentsPage() {
           {loading ? (
             <div className="space-y-2 p-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-xl p-3">
-                  <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                <div key={i} className="flex items-center gap-3 border p-3">
+                  <Skeleton className="h-10 w-10 shrink-0" />
                   <div className="min-w-0 flex-1">
                     <Skeleton className="h-4 w-3/4" />
                     <Skeleton className="mt-2 h-3 w-1/2" />
                   </div>
                   <Skeleton className="hidden h-4 w-16 md:block" />
-                  <Skeleton className="hidden h-8 w-24 rounded-xl md:block" />
+                  <Skeleton className="hidden h-8 w-24 md:block" />
                 </div>
               ))}
             </div>
@@ -450,7 +450,7 @@ export default function StudentsPage() {
                         }
                       }}
                       className={cn(
-                        "grid cursor-pointer grid-cols-1 gap-3 rounded-xl p-4 transition-colors hover:bg-gray-50 md:grid-cols-[minmax(0,2fr)_1fr_1fr_1fr_1.3fr] md:items-center",
+                        "grid cursor-pointer grid-cols-1 gap-3 border p-4 transition-colors hover:bg-gray-50 md:grid-cols-[minmax(0,2fr)_1fr_1fr_1fr_1.3fr] md:items-center",
                         isOpen && "bg-indigo-50/40 hover:bg-indigo-50/60",
                       )}
                     >
@@ -512,9 +512,9 @@ export default function StudentsPage() {
                     </div>
 
                     {isOpen && (
-                      <div className="grid grid-cols-1 gap-4 rounded-xl bg-gray-50/60 p-4 md:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-4 bg-gray-50/60 p-4 md:grid-cols-3">
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
                             Practice
                           </p>
                           <dl className="mt-2 space-y-1.5 text-sm">
@@ -549,7 +549,7 @@ export default function StudentsPage() {
                         </div>
 
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
                             Unit mastery
                           </p>
                           {units.length === 0 ? (
@@ -564,14 +564,14 @@ export default function StudentsPage() {
                                     </span>
                                     <span className="shrink-0 text-gray-400">{u.pct}%</span>
                                   </div>
-                                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-200">
+                                  <div className="mt-1 h-2 overflow-hidden bg-gray-200">
                                     <div
                                       className={cn(
-                                        "h-full rounded-full",
+                                        "h-full",
                                         u.pct >= 80
                                           ? "bg-emerald-500"
                                           : u.pct >= 50
-                                            ? "bg-indigo-500"
+                                            ? "bg-ink"
                                             : "bg-amber-500",
                                       )}
                                       style={{ width: `${u.pct}%` }}
@@ -584,7 +584,7 @@ export default function StudentsPage() {
                         </div>
 
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
                             Recent exams
                           </p>
                           {s.submissions.length === 0 ? (
@@ -597,7 +597,7 @@ export default function StudentsPage() {
                                 return (
                                   <div
                                     key={sub.id}
-                                    className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs"
+                                    className="flex items-center justify-between gap-2 border border-gray-200 bg-white px-3 py-2 text-xs"
                                   >
                                     <span className="min-w-0 truncate text-gray-700">
                                       {sheetTitles[sub.sheet_id] || `Sheet #${sub.sheet_id}`}

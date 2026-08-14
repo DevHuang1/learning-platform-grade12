@@ -429,7 +429,7 @@ export default function QuizPage() {
             <div>
               <label
                 htmlFor="unit"
-                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500"
               >
                 Unit
               </label>
@@ -442,7 +442,7 @@ export default function QuizPage() {
                       e.target.value === "all" ? "all" : Number(e.target.value),
                     )
                   }
-                  className="w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-9 pr-9 text-sm font-medium text-gray-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full appearance-none border border-gray-300 bg-white py-2.5 pl-9 pr-9 text-sm font-medium text-gray-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
                   <option value="all">All Units</option>
                   {UNITS.map((u) => (
@@ -544,12 +544,12 @@ export default function QuizPage() {
             <>
               <div className="flex items-center justify-between gap-2">
                 <Badge tone="indigo">{unitTag}</Badge>
-                <span className="text-xs font-semibold text-gray-400">
+                <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
                   {clueLabel}
                 </span>
               </div>
               {vocabReady && isVocabLoaded() && (
-                <span className="mt-1 block text-[10px] font-medium text-gray-400">
+                <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.08em] text-gray-400">
                   Vocabulary synced from database
                 </span>
               )}
@@ -591,7 +591,7 @@ export default function QuizPage() {
                   }}
                   disabled={solved}
                   placeholder="Type the English word..."
-                  className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-4 py-3 text-base font-medium text-gray-800 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:bg-gray-50 disabled:text-gray-500"
+                  className="min-w-0 flex-1 border border-gray-300 bg-white px-4 py-3 text-base font-medium text-gray-800 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:bg-gray-50 disabled:text-gray-500"
                 />
                 <Button
                   size="lg"
@@ -617,7 +617,7 @@ export default function QuizPage() {
               {feedback && (
                 <div
                   className={cn(
-                    "mt-4 rounded-xl border p-4 text-sm leading-6",
+                    "mt-4 border p-4 text-sm leading-6",
                     feedback.ok
                       ? "border-emerald-200 bg-emerald-50 text-emerald-900"
                       : "border-red-200 bg-red-50 text-red-900",
@@ -662,7 +662,7 @@ export default function QuizPage() {
 
         <Card>
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-base font-bold text-gray-900">History</h2>
+            <h2 className="font-serif text-base font-bold text-gray-900">History</h2>
             {history.length > 0 && (
               <Button
                 variant="danger"
@@ -690,7 +690,7 @@ export default function QuizPage() {
                 <div
                   key={i}
                   className={cn(
-                    "rounded-xl border p-3",
+                    "border p-3",
                     h.ok
                       ? "border-emerald-200 bg-emerald-50/60"
                       : "border-red-200 bg-red-50/60",
@@ -737,7 +737,7 @@ export default function QuizPage() {
           </div>
           {cloudHistory.length > 0 && (
             <>
-              <h3 className="mt-5 border-t border-gray-100 pt-4 text-sm font-bold text-gray-900">
+              <h3 className="mt-5 border-t border-gray-100 pt-4 font-serif text-sm font-bold text-gray-900">
                 Your saved history (cloud)
               </h3>
               <p className="mt-1 text-sm text-gray-500">
@@ -749,7 +749,7 @@ export default function QuizPage() {
                   <div
                     key={h.id}
                     className={cn(
-                      "rounded-xl border p-3",
+                      "border p-3",
                       h.ok
                         ? "border-emerald-200 bg-emerald-50/60"
                         : "border-red-200 bg-red-50/60",
