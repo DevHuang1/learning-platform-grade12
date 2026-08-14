@@ -9,6 +9,7 @@ import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
 import { QUESTION_TYPE_LABELS } from "@/lib/constants";
+import { checkAnswer } from "@/lib/utils";
 import { fetchExamSheet, insertAnswer, insertSubmission } from "@/lib/db";
 import {
   ensureBuckets,
@@ -246,6 +247,9 @@ export default function TakeExamPage() {
           imagePath = res.path;
           imageUrl = res.publicUrl;
         }
+        // Check answer and award marks (case-insensitive, ignore whitespace)
+        const isCorrect = await checkAnswer(q.question, currentText.trim());
+        const marksAwarded = isCorrect ? q.question.marks : 0;
         await insertAnswer({
           submission_id: sub.id,
           question_id: q.question.id,
@@ -254,10 +258,21 @@ export default function TakeExamPage() {
             : currentText.trim() || null,
           image_path: imagePath,
           image_url: imageUrl,
+          marks_awarded: marksAwarded,
         });
+        // Show feedback
+        if (isCorrect) {
+          toast.success(
+            "Correct answer! " + q.question.marks + " marks awarded.",
+          );
+        } else {
+          toast.error(
+            "Incorrect. The expected answer is: " +
+              (q.question.answer_guide || ""),
+            " " + q.question.marks + " marks available.",
+          );
+        }
       }
-      toast.success("Answer submitted!");
-      setAnswersSaved((n) => n + 1);
       if (currentIndex + 1 >= flatQuestions.length) {
         setFinished(true);
       } else {

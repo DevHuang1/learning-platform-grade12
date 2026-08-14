@@ -305,14 +305,14 @@ values
   ('exam-answers', 'exam-answers', true)
 on conflict (id) do nothing;
 
--- Storage RLS: images must be readable by any authenticated user.
+-- Storage RLS: images readable by anyone (anon key can read public buckets)
 drop policy if exists "read question-images" on storage.objects;
 create policy "read question-images" on storage.objects
-  for select to authenticated using (bucket_id = 'question-images');
+  for select to public using (bucket_id = 'question-images');
 
 drop policy if exists "read exam-answers" on storage.objects;
 create policy "read exam-answers" on storage.objects
-  for select to authenticated using (bucket_id = 'exam-answers');
+  for select to public using (bucket_id = 'exam-answers');
 
 -- Teachers manage question/section images.
 drop policy if exists "teacher write question-images" on storage.objects;
