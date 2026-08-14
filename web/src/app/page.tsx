@@ -6,65 +6,67 @@ import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { href: "#work", label: "Work" },
-  { href: "#capabilities", label: "Capabilities" },
+  { href: "#features", label: "Features" },
+  { href: "#subjects", label: "Subjects" },
+  { href: "#demo", label: "Demo" },
   { href: "#contact", label: "Contact" },
 ];
 
-const PROJECTS = [
-  {
-    title: "Adaptive Vocabulary Engine",
-    category: "LEARNING SYSTEM",
-    bg: "#e0e7ff",
-    orb: "rgba(99, 102, 241, 0.4)",
-  },
-  {
-    title: "Sentence Clue Database",
-    category: "CONTENT ARCHITECTURE",
-    bg: "#ede9fe",
-    orb: "rgba(168, 85, 247, 0.35)",
-  },
-  {
-    title: "Streak & Mastery Tracker",
-    category: "PROGRESS ANALYTICS",
-    bg: "#e0e7ff",
-    orb: "rgba(99, 102, 241, 0.4)",
-  },
-  {
-    title: "Exam Simulation Suite",
-    category: "ASSESSMENT TOOL",
-    bg: "#ede9fe",
-    orb: "rgba(168, 85, 247, 0.35)",
-  },
-];
-
-const CAPABILITIES = [
+const FEATURES = [
   {
     title: "Adaptive Difficulty",
-    tags: ["Dynamic Components", "Progressive Clues", "Two Modes"],
-    body: "Every question adapts to the learner. Normal and advanced sentence clues keep the challenge alive without ever punishing a wrong answer.",
+    description:
+      "Normal and advanced sentence clues adapt to every learner. No penalties — just steady progress.",
+    tags: ["Two Modes", "Instant Feedback", "No Penalty"],
   },
   {
     title: "Curated Vocabulary",
+    description:
+      "585 hand-picked words across 12 themed units, each paired with a clear sentence clue.",
     tags: ["12 Units", "585 Words", "585 Sentences"],
-    body: "A hand-built bank of 585 words across twelve themed units, each paired with a sentence clue designed for one classroom, one year.",
   },
   {
-    title: "Progress Intelligence",
-    tags: ["Streaks", "History", "Per-Unit Mastery"],
-    body: "Track streaks, review history, and watch per-unit mastery grow. The system remembers where you left off and meets you there.",
+    title: "Progress Tracking",
+    description:
+      "Streaks, per-unit mastery, and full history so you always know where you stand.",
+    tags: ["Streaks", "History", "Mastery"],
   },
   {
-    title: "Instant Feedback",
-    tags: ["Zero Penalty", "Immediate Response", "Forgiving Loop"],
-    body: "Answers resolve the moment you type. No penalties, no pressure — just a continuous, forgiving loop that keeps you practicing.",
+    title: "Flexible Practice",
+    description:
+      "Fill-in-the-blank or meaning-based questions. Quiz, exam, or schedule mode.",
+    tags: ["Quiz", "Exams", "Schedule"],
   },
 ];
 
-const FOOTER_LINKS = [
-  { label: "LOCATION", value: "Yangon, Myanmar" },
-  { label: "CONTACT", value: "hello@g12.study" },
-  { label: "SOCIAL", value: "GitHub · X · LinkedIn" },
+const DEMO_STEPS = [
+  {
+    n: "01",
+    title: "Pick a unit",
+    text: "Choose from 12 themed vocabulary units.",
+  },
+  {
+    n: "02",
+    title: "Answer the clue",
+    text: "Type the word or select the right option.",
+  },
+  {
+    n: "03",
+    title: "Get instant feedback",
+    text: "Know immediately if you're right.",
+  },
+  {
+    n: "04",
+    title: "Keep your streak",
+    text: "Show up daily and watch your streak grow.",
+  },
+];
+
+const SUBJECTS = [
+  { name: "English", count: "12 units" },
+  { name: "Vocabulary", count: "585 words" },
+  { name: "Sentences", count: "1,170 clues" },
+  { name: "Modes", count: "2 formats" },
 ];
 
 function useReveal() {
@@ -110,162 +112,133 @@ function Reveal({
   );
 }
 
-function MeshBackground() {
-  return (
-    <div className="mesh-bg" aria-hidden="true">
-      <div
-        className="mesh-blob left-[-10%] top-[-20%] h-[60vh] w-[60vw]"
-        style={{ background: "rgba(99, 102, 241, 0.5)" }}
-      />
-      <div
-        className="mesh-blob right-[-15%] top-[10%] h-[55vh] w-[50vw]"
-        style={{
-          background: "rgba(168, 85, 247, 0.4)",
-          animationDelay: "-10s",
-        }}
-      />
-      <div
-        className="mesh-blob bottom-[-25%] left-[20%] h-[50vh] w-[45vw]"
-        style={{
-          background: "rgba(99, 102, 241, 0.35)",
-          animationDelay: "-20s",
-        }}
-      />
-    </div>
-  );
-}
-
 function Header() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex h-20 items-center justify-between px-6 mix-blend-difference text-white md:px-10">
-      <a href="#top" className="font-serif text-2xl italic tracking-tight">
-        G12<span className="text-indigo-300">.</span>
-      </a>
-      <nav className="hidden items-center gap-10 md:flex">
-        {NAV_LINKS.map((l) => (
-          <a
-            key={l.href}
-            href={l.href}
-            className="group relative font-mono text-[11px] uppercase tracking-[0.3em] text-white/80 transition-colors hover:text-white"
-          >
-            {l.label}
-            <span className="absolute -bottom-1 left-0 h-px w-0 bg-white transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] group-hover:w-full" />
-          </a>
-        ))}
-      </nav>
-      <Link
-        href="/login"
-        className="flex items-center gap-2 rounded-full border border-white/30 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-white/90 transition-colors hover:bg-white/10"
-      >
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-        </span>
-        System Online
-      </Link>
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/85 backdrop-blur">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+        <a
+          href="#top"
+          className="text-lg font-bold tracking-tight text-slate-900"
+        >
+          G12<span className="text-indigo-600">.</span>
+        </a>
+        <nav className="hidden items-center gap-8 md:flex">
+          {NAV_LINKS.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+        <Link href="/login">
+          <Button size="sm" className="rounded-full">
+            Get started
+          </Button>
+        </Link>
+      </div>
     </header>
   );
 }
 
 function Hero() {
-  const [heroIn, setHeroIn] = useState(false);
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setHeroIn(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
   return (
-    <section
-      id="top"
-      className="relative flex min-h-screen flex-col overflow-hidden bg-cream"
-    >
-      <MeshBackground />
-
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 pb-[30vh] pt-28 md:px-10">
+    <section id="top" className="relative overflow-hidden bg-slate-50">
+      <div className="mesh-bg" aria-hidden="true">
         <div
-          className={cn(
-            "max-w-5xl transition-all duration-1000 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-            heroIn ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
-          )}
-        >
-          <p className="label text-indigo-700">
-            G12 ENGLISH VOCABULARY · GRADE 12
-          </p>
-          <h1 className="mt-8 max-w-5xl text-balance font-serif text-[clamp(2.75rem,8vw,7rem)] leading-[0.9] tracking-[-0.02em] text-ink">
-            The G12 vocabulary{" "}
-            <em className="italic text-indigo-700">practice</em> you actually
-            finish.
-          </h1>
-          <p className="mt-8 max-w-xl font-mono text-sm leading-[1.9] tracking-[0.07em] text-ink-2">
-            A focused vocabulary quiz for grade twelve — twelve themed units,
-            585 words, and a sentence clue for every one. Normal or advanced,
-            fill-in-the-blank or meaning. No penalty for trying.
-          </p>
+          className="mesh-blob left-[-10%] top-[-30%] h-[50vh] w-[50vw]"
+          style={{ background: "rgba(99, 102, 241, 0.35)" }}
+        />
+        <div
+          className="mesh-blob right-[-15%] top-[10%] h-[45vh] w-[40vw]"
+          style={{
+            background: "rgba(129, 140, 248, 0.3)",
+            animationDelay: "-10s",
+          }}
+        />
+      </div>
+
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center px-4 pb-20 pt-32 text-center sm:px-6 md:pt-40">
+        <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-medium text-indigo-700">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          System Online
+        </span>
+        <h1 className="mt-6 max-w-3xl text-balance text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
+          Learning platform for G12 English
+        </h1>
+        <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
+          Twelve themed units, 585 words, and a sentence clue for every one.
+          Normal or advanced — practice the way you learn best.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link href="/login">
+            <Button size="lg" className="rounded-full px-8">
+              Start practicing
+            </Button>
+          </Link>
+          <Link href="#demo">
+            <Button size="lg" variant="secondary" className="rounded-full px-8">
+              See how it works
+            </Button>
+          </Link>
         </div>
-      </div>
 
-      <div className="wave-container z-20">
-        <div className="wave-curve" />
-      </div>
-
-      <div className="absolute bottom-[12vh] left-1/2 z-30 -translate-x-1/2">
-        <Link href="/login">
-          <Button
-            size="lg"
-            className="btn-pulse rounded-full bg-indigo-700 px-8 font-mono text-[11px] uppercase tracking-[0.3em] text-white hover:bg-indigo-800"
-          >
-            Initialize
-          </Button>
-        </Link>
+        <div className="mt-16 grid w-full max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
+          {SUBJECTS.map((s) => (
+            <div
+              key={s.name}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-5 shadow-sm"
+            >
+              <p className="text-2xl font-bold tracking-tight text-slate-900">
+                {s.count}
+              </p>
+              <p className="mt-1 text-sm font-medium text-slate-500">
+                {s.name}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-function WorkGrid() {
+function Features() {
   return (
-    <section id="work" className="scroll-mt-20 bg-cream">
-      <div className="mx-auto w-full max-w-7xl px-6 py-28 md:px-10">
+    <section id="features" className="scroll-mt-20 bg-white">
+      <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
         <Reveal>
-          <p className="label text-indigo-700">SELECTED WORK</p>
-          <h2 className="mt-4 font-serif text-5xl leading-[1.05] tracking-[-0.02em] text-ink md:text-6xl">
-            Built for <em className="italic text-indigo-700">one classroom</em>.
+          <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+            Features
+          </p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Everything you need to build a strong vocabulary
           </h2>
         </Reveal>
 
-        <div className="mt-16 grid gap-x-8 gap-y-16 md:grid-cols-2">
-          {PROJECTS.map((p, i) => (
-            <Reveal
-              key={p.title}
-              delay={i % 2 === 0 ? 0 : 150}
-              className={cn(i % 2 === 1 && "md:mt-24")}
-            >
-              <a
-                href="/login"
-                className="group block overflow-hidden rounded-2xl transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-4 hover:scale-[1.02]"
-              >
-                <div
-                  className="relative aspect-[4/3] overflow-hidden rounded-2xl"
-                  style={{ background: p.bg }}
-                >
-                  <div
-                    className="absolute left-1/2 top-1/2 h-2/3 w-2/3 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl transition-transform duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110"
-                    style={{ background: p.orb }}
-                  />
-                  <div className="absolute bottom-4 right-4 translate-y-4 opacity-0 transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100">
-                    <span className="rounded-full bg-white px-5 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-ink shadow-[0_0_20px_rgba(67,56,202,0.1)]">
-                      View
+        <div className="mt-12 grid gap-6 sm:grid-cols-2">
+          {FEATURES.map((f, i) => (
+            <Reveal key={f.title} delay={i * 80}>
+              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-md">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {f.title}
+                </h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+                  {f.description}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {f.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+                    >
+                      {t}
                     </span>
-                  </div>
+                  ))}
                 </div>
-                <div className="mt-5">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <h3 className="font-serif text-2xl text-ink">{p.title}</h3>
-                    <p className="label shrink-0 text-muted">{p.category}</p>
-                  </div>
-                  <div className="line-draw mt-4 h-px w-full bg-neutral-200" />
-                </div>
-              </a>
+              </div>
             </Reveal>
           ))}
         </div>
@@ -274,82 +247,42 @@ function WorkGrid() {
   );
 }
 
-function Capabilities() {
-  const [open, setOpen] = useState(0);
-
+function Demo() {
   return (
-    <section
-      id="capabilities"
-      className="scroll-mt-20 border-t border-neutral-200 bg-cream"
-    >
-      <div className="mx-auto grid w-full max-w-7xl gap-16 px-6 py-28 md:px-10 lg:grid-cols-2">
-        <div className="lg:sticky lg:top-32 lg:self-start">
-          <Reveal>
-            <p className="label text-indigo-700">SERVICES</p>
-            <h2 className="mt-4 font-serif text-5xl leading-[1.05] tracking-[-0.02em] text-ink md:text-6xl">
-              Core <em className="italic text-indigo-700">capabilities</em>.
-            </h2>
-            <a
-              href="/login"
-              className="group mt-10 inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.3em] text-ink transition-colors hover:text-indigo-700"
-            >
-              Start practicing
-              <span className="inline-block transition-transform duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-2">
-                →
-              </span>
-            </a>
-          </Reveal>
+    <section id="demo" className="scroll-mt-20 bg-slate-50">
+      <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
+        <Reveal>
+          <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+            How it works
+          </p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Simple enough to start today
+          </h2>
+        </Reveal>
+
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {DEMO_STEPS.map((s, i) => (
+            <Reveal key={s.n} delay={i * 80}>
+              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6">
+                <span className="text-sm font-bold text-indigo-600">{s.n}</span>
+                <h3 className="mt-3 text-base font-semibold text-slate-900">
+                  {s.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  {s.text}
+                </p>
+              </div>
+            </Reveal>
+          ))}
         </div>
 
-        <div className="border-t border-neutral-200">
-          {CAPABILITIES.map((c, i) => {
-            const isOpen = open === i;
-            return (
-              <Reveal key={c.title} delay={i * 80}>
-                <div className="border-b border-neutral-200">
-                  <button
-                    onClick={() => setOpen(isOpen ? -1 : i)}
-                    className="flex w-full items-baseline justify-between gap-6 py-8 text-left"
-                  >
-                    <span
-                      className={cn(
-                        "font-serif text-3xl transition-colors duration-500 md:text-4xl",
-                        isOpen ? "text-ink" : "text-neutral-400 hover:text-ink",
-                      )}
-                    >
-                      {c.title}
-                    </span>
-                    <span
-                      className={cn(
-                        "shrink-0 font-mono text-sm text-muted transition-transform duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-                        isOpen && "rotate-45",
-                      )}
-                    >
-                      +
-                    </span>
-                  </button>
-                  <div className={cn("accordion-panel", isOpen && "open")}>
-                    <div>
-                      <p className="max-w-md pb-8 font-mono text-sm leading-[1.9] tracking-[0.05em] text-ink-2">
-                        {c.body}
-                      </p>
-                      <div className="flex flex-wrap gap-3 pb-8">
-                        {c.tags.map((t) => (
-                          <span
-                            key={t}
-                            className="font-mono text-[11px] uppercase tracking-[0.3em] text-indigo-700"
-                          >
-                            [{t}]
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
+        <Reveal className="mt-12 text-center">
+          <Link href="/login">
+            <Button size="lg" className="rounded-full px-10">
+              Try it free
+            </Button>
+          </Link>
+        </Reveal>
       </div>
     </section>
   );
@@ -357,38 +290,71 @@ function Capabilities() {
 
 function Footer() {
   return (
-    <footer
-      id="contact"
-      className="relative overflow-hidden rounded-t-[5rem] bg-ink text-cream"
-    >
-      <div
-        className="pointer-events-none absolute left-1/2 top-0 h-[40vh] w-[80vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
-        style={{ background: "rgba(67, 56, 202, 0.25)" }}
-      />
-      <div className="relative mx-auto w-full max-w-7xl px-6 pb-10 pt-28 md:px-10">
-        <Reveal>
-          <h2 className="max-w-4xl font-serif text-[clamp(32px,5vw,72px)] leading-[1.05] tracking-[-0.02em]">
-            Five minutes a day keeps{" "}
-            <em className="italic text-indigo-300">585 words</em> in your head.
-          </h2>
-        </Reveal>
+    <footer id="contact" className="bg-slate-900 text-slate-300">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-16 sm:px-6">
+        <h2 className="max-w-2xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          Five minutes a day keeps 585 words in your head.
+        </h2>
 
-        <div className="mt-20 grid gap-10 border-t border-white/10 pt-12 md:grid-cols-3">
-          {FOOTER_LINKS.map((f) => (
-            <div key={f.label}>
-              <p className="label text-white/40">{f.label}</p>
-              <p className="mt-3 font-serif text-xl text-cream/90">{f.value}</p>
-            </div>
-          ))}
+        <div className="mt-12 grid gap-8 sm:grid-cols-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+              Platform
+            </p>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <Link href="/quiz" className="hover:text-white">
+                  Quiz
+                </Link>
+              </li>
+              <li>
+                <Link href="/exam" className="hover:text-white">
+                  Exams
+                </Link>
+              </li>
+              <li>
+                <Link href="/schedule" className="hover:text-white">
+                  Schedule
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+              Results
+            </p>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <Link href="/result" className="hover:text-white">
+                  My results
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard" className="hover:text-white">
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-white">
+                  Sign in
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+              Contact
+            </p>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed">
+              G12 English — built for one classroom, one year, and every word
+              you'll be asked.
+            </p>
+          </div>
         </div>
 
-        <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
-            © 2026 G12
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
-            ORGANIC INTELLIGENCE EDITION
-          </span>
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+          <span className="text-sm text-slate-400">© 2026 G12</span>
+          <span className="text-sm text-slate-400">Made for students</span>
         </div>
       </div>
     </footer>
@@ -397,11 +363,11 @@ function Footer() {
 
 export default function LandingPage() {
   return (
-    <main className="bg-cream">
+    <main className="bg-white">
       <Header />
       <Hero />
-      <WorkGrid />
-      <Capabilities />
+      <Features />
+      <Demo />
       <Footer />
     </main>
   );
