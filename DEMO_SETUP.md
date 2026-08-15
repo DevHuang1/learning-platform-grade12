@@ -1,6 +1,6 @@
 # English exam and transformer demo
 
-The repository now includes two published Grade 12 English exams, four answer fixtures, and a repeatable Supabase demo seeder. The seed creates or updates a confirmed student account, publishes the exams, uploads representative PDF and PNG answers into the private `exam-answers` bucket, creates submissions, and inserts queued teacher-review rows.
+The repository now includes two published Grade 12 English exam fixtures in `web/supabase/schema.sql`, four answer fixtures, and a repeatable Supabase demo seeder. Applying the schema creates the exams. The seed then creates or updates a confirmed student account, uploads representative PDF and PNG answers into the private `exam-answers` bucket, creates submissions, and inserts queued teacher-review rows.
 
 ## Prerequisites
 
@@ -19,13 +19,13 @@ The service-role key and Hugging Face token must remain server-only. Do not comm
 
 ## Seed command
 
-From the `web` directory, run:
+After applying `web/supabase/schema.sql` in the Supabase SQL editor, create the demo student in Supabase Auth with the suggested email and a temporary password. From the `web` directory, run:
 
 ```bash
 npm run demo:seed
 ```
 
-The default demo login is `demo.student+g12@example.com`. For a predictable password, set `DEMO_STUDENT_PASSWORD` before running the seed. Otherwise, the script generates a one-time password and prints it once in the terminal. Set `DEMO_RESET=false` to retain existing exams with the same titles; the default behavior replaces prior demo exams and creates fresh submissions.
+The default demo login is `demo.student+g12@example.com`. For a predictable password, set `DEMO_STUDENT_PASSWORD` before running the seed; the script can create or update this account when the service-role key is configured. Otherwise, it generates a one-time password and prints it once in the terminal. The schema block is idempotent for exam titles. Set `DEMO_RESET=false` to retain existing seeded exams when using the script; the default behavior replaces prior demo exams created by the script and creates fresh submissions.
 
 ```bash
 DEMO_STUDENT_PASSWORD='choose-a-temporary-password' npm run demo:seed
