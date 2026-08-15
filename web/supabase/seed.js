@@ -66,7 +66,9 @@ async function main() {
 
   console.log("Ensuring storage buckets…");
   for (const bucket of ["exam-answers", "question-images"]) {
-    await supabase.storage.createBucket(bucket, { public: true });
+    await supabase.storage.createBucket(bucket, {
+      public: bucket === "question-images",
+    });
   }
 
   const wordCount = units.reduce((a, u) => a + u.words.length, 0);
