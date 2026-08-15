@@ -44,7 +44,7 @@ The processing lifecycle is represented by `exam_answer_reviews.processing_statu
 
 1. The student uploads a PDF or image to the `exam-answers` bucket and inserts an answer row with file metadata and no awarded marks.
 2. The browser calls `POST /api/exam/process-answer` with the answer ID. The route verifies the signed-in student owns the answer through the normal Supabase session client.
-3. The route creates or updates a review row, marks the submission as `processing`, and schedules the processor after returning a `202` response.
+3. The route creates or updates a review row, marks the submission as `processing`, and schedules the processor after returning a `202` response. The processor reads private answer objects with the service-role client and does not expose their storage URLs to the model or browser.
 4. The server-only processor downloads the file with the service-role client, extracts PDF text when possible, and calls Hugging Face with the question prompt, answer guide, maximum marks, and answer evidence.
 5. The processor writes the suggestion and confidence into `exam_answer_reviews`. Supabase Realtime delivers the row update to the teacher Results screen.
 6. The teacher reviews the evidence, adjusts the final marks, optionally adds feedback, and saves grades through the existing grading flow.
@@ -55,7 +55,7 @@ The route is idempotent for answers already in `processing`, `ready_for_review`,
 
 The processor limits answer files to 12 MB, caps scanned-PDF OCR fan-out at five pages, truncates extracted text before inference, uses a 90-second inference timeout, clamps model confidence to the range 0–1, and clamps suggested marks to the question’s maximum. Low-confidence suggestions remain visible but are never automatically awarded.
 
-The existing `exam-answers` bucket is currently public for backward compatibility with the platform’s original image-answer display path. A follow-up security hardening pass should make this bucket private and replace direct public URLs with short-lived signed URLs before the platform handles sensitive student records in production.
+The `exam-answers` bucket is private. The browser never stores or renders a public Supabase object URL for student answers. Students and teachers view answer files through the authenticated `GET /api/exam/answer-file?answerId=...` route, which checks the signed-in user against the submission owner or teacher role before the server downloads the object with the service-role client. The migration also clears legacy `image_url` and `file_url` values so old public URLs are no longer used by the application. Question illustrations remain public because they are exam content rather than student records.
 
 ## References
 
@@ -66,3 +66,27 @@ The existing `exam-answers` bucket is currently public for backward compatibilit
 [3]: https://github.com/mehmet-kozan/pdf-parse pdf-parse repository and runtime documentation.
 
 [4]: https://huggingface.co/microsoft/trocr-base-handwritten Microsoft TrOCR handwritten model card and provider availability.
+
+
+[5]: https://supabase.com/docs/guides/storage/buckets/fundamentals Supabase Storage Bucket Fundamentals.
+
+[6]: https://supabase.com/docs/guides/storage/serving/downloads Supabase Serving Assets from Storage.
+
+[7]: https://supabase.com/docs/guides/database/postgres/row-level-security Supabase Row Level Security documentation.
+
+## Privacy verification checklist
+
+After applying the schema, verify the following in the Supabase SQL editor and with two authenticated test accounts. Supabase’s private bucket model requires downloads to pass through authenticated storage access or time-limited signed URLs, while public buckets bypass retrieval access controls [5] [6].
+
+| Check | Expected result |
+|---|---|
+| `select public from storage.buckets where id = 'exam-answers';` | Returns `false`. |
+| Anonymous request to the old `/storage/v1/object/public/exam-answers/...` URL | Does not return the answer file. |
+| Student A reads their own `exam_submissions`, `exam_answers`, and answer-file route | Allowed. |
+| Student A reads Student B’s submission or answer-file route | Returns no row or `403`; the file bytes are not returned. |
+| A teacher reads a student submission and answer-file route | Allowed. |
+| Student A uploads into `submission-<Student B submission id>/...` | Rejected by both the database and storage policies. |
+| Student A inserts an answer with marks, feedback, or a public URL | Rejected by the `with check` policy. |
+| Browser source and network payloads | Do not contain `SUPABASE_SERVICE_ROLE_KEY` or direct public answer URLs. |
+
+The repository cannot execute these authenticated Supabase checks without the project URL, test accounts, and deployment credentials. They are therefore required as a deployment acceptance test rather than being claimed as locally executed results.

@@ -208,6 +208,14 @@ alter table exam_answers add column if not exists file_name text;
 alter table exam_answers add column if not exists file_mime_type text;
 alter table exam_answers add column if not exists file_size bigint;
 
+create index if not exists idx_exam_submissions_user_id on exam_submissions(user_id);
+create index if not exists idx_exam_answers_submission_id on exam_answers(submission_id);
+
+-- Existing answer URLs were generated for the old public bucket. The bucket is
+-- private now, so readers must use the signed/authorized file route instead.
+update exam_answers set image_url = null where image_path is not null;
+update exam_answers set file_url = null where file_path is not null;
+
 -- Teacher-only transformer output. Students never receive model suggestions.
 create table if not exists exam_answer_reviews (
   id bigserial primary key,
@@ -318,15 +326,20 @@ create policy "write exam_questions" on exam_questions for all using (public.is_
 
 -- Submissions: students see their own; teachers see all.push
 drop policy if exists "submissions select own" on exam_submissions;
-create policy "submissions select own" on exam_submissions for select using (auth.uid() = user_id or public.is_teacher());
+create policy "submissions select own" on exam_submissions for select to authenticated using (auth.uid() = user_id or public.is_teacher());
 drop policy if exists "submissions insert own" on exam_submissions;
-create policy "submissions insert own" on exam_submissions for insert with check (auth.uid() = user_id);
+create policy "submissions insert own" on exam_submissions for insert to authenticated with check (
+  auth.uid() = user_id
+  and status = 'submitted'
+  and coalesce(obtained_marks, 0) = 0
+  and graded_by is null
+);
 drop policy if exists "submissions teacher update" on exam_submissions;
-create policy "submissions teacher update" on exam_submissions for update using (public.is_teacher()) with check (public.is_teacher());
+create policy "submissions teacher update" on exam_submissions for update to authenticated using (public.is_teacher()) with check (public.is_teacher());
 
 -- Answers: students see their own; teachers see all.
 drop policy if exists "answers select own" on exam_answers;
-create policy "answers select own" on exam_answers for select using (
+create policy "answers select own" on exam_answers for select to authenticated using (
   public.is_teacher()
   or exists (
     select 1 from exam_submissions s
@@ -334,14 +347,26 @@ create policy "answers select own" on exam_answers for select using (
   )
 );
 drop policy if exists "answers insert own" on exam_answers;
-create policy "answers insert own" on exam_answers for insert with check (
+create policy "answers insert own" on exam_answers for insert to authenticated with check (
   exists (
     select 1 from exam_submissions s
     where s.id = exam_answers.submission_id and s.user_id = auth.uid()
   )
+  and marks_awarded is null
+  and feedback is null
+  and image_url is null
+  and file_url is null
+  and (
+    image_path is null
+    or image_path like 'submission-' || submission_id::text || '/%'
+  )
+  and (
+    file_path is null
+    or file_path like 'submission-' || submission_id::text || '/%'
+  )
 );
 drop policy if exists "answers teacher update" on exam_answers;
-create policy "answers teacher update" on exam_answers for update using (public.is_teacher()) with check (public.is_teacher());
+create policy "answers teacher update" on exam_answers for update to authenticated using (public.is_teacher()) with check (public.is_teacher());
 
 -- Transformer results are visible only to teachers.
 drop policy if exists "answer reviews teacher select" on exam_answer_reviews;
@@ -357,17 +382,29 @@ create policy "answer reviews teacher update" on exam_answer_reviews for update 
 insert into storage.buckets (id, name, public)
 values
   ('question-images', 'question-images', true),
-  ('exam-answers', 'exam-answers', true)
-on conflict (id) do nothing;
+  ('exam-answers', 'exam-answers', false)
+on conflict (id) do update set public = excluded.public;
 
--- Storage RLS: images readable by anyone (anon key can read public buckets)
+-- Question illustrations are intentionally public; student answer files are not.
 drop policy if exists "read question-images" on storage.objects;
 create policy "read question-images" on storage.objects
   for select to public using (bucket_id = 'question-images');
 
 drop policy if exists "read exam-answers" on storage.objects;
-create policy "read exam-answers" on storage.objects
-  for select to public using (bucket_id = 'exam-answers');
+drop policy if exists "answer owner or teacher read" on storage.objects;
+create policy "answer owner or teacher read" on storage.objects
+  for select to authenticated using (
+    bucket_id = 'exam-answers'
+    and (
+      public.is_teacher()
+      or exists (
+        select 1
+        from public.exam_submissions s
+        where s.id = nullif(substring(name from '^submission-([0-9]+)/'), '')::bigint
+          and s.user_id = auth.uid()
+      )
+    )
+  );
 
 -- Teachers manage question/section images.
 drop policy if exists "teacher write question-images" on storage.objects;
@@ -380,7 +417,152 @@ drop policy if exists "teacher delete question-images" on storage.objects;
 create policy "teacher delete question-images" on storage.objects
   for delete to authenticated using (bucket_id = 'question-images' and public.is_teacher());
 
--- Students upload their written-answer photos to exam-answers.
+-- Students can upload only into their own submission folder.
 drop policy if exists "student insert exam-answers" on storage.objects;
-create policy "student insert exam-answers" on storage.objects
-  for insert to authenticated with check (bucket_id = 'exam-answers');
+drop policy if exists "student insert own exam-answers" on storage.objects;
+create policy "student insert own exam-answers" on storage.objects
+  for insert to authenticated with check (
+    bucket_id = 'exam-answers'
+    and exists (
+      select 1
+      from public.exam_submissions s
+      where s.id = nullif(substring(name from '^submission-([0-9]+)/'), '')::bigint
+        and s.user_id = auth.uid()
+    )
+  );
+
+
+-- ============================================================
+-- Optional demo English exams
+-- ============================================================
+-- This block creates two published Grade 12 English exams only when the
+-- matching titles do not already exist. It intentionally does not create an
+-- auth.users row: create the demo student in Supabase Auth, then run
+-- `npm run demo:seed` from web/ to upload the PDF/PNG answer fixtures and
+-- create queued demo submissions.
+--
+-- Suggested demo account:
+--   email: demo.student+g12@example.com
+--   password: choose a temporary password in Supabase Auth
+--   role: student
+-- ============================================================
+do $$
+declare
+  reading_sheet_id bigint;
+  reading_section_id bigint;
+  writing_sheet_id bigint;
+  writing_section_id bigint;
+begin
+  if not exists (
+    select 1 from exam_sheets
+    where title = 'Demo English Exam 1 — Reading and Language'
+  ) then
+    insert into exam_sheets (title, subject, description, duration_minutes, status)
+    values (
+      'Demo English Exam 1 — Reading and Language',
+      'English',
+      'A short Grade 12 English review exam covering reading, grammar, and evidence-based writing.',
+      35,
+      'published'
+    ) returning id into reading_sheet_id;
+
+    insert into exam_sheet_sections (sheet_id, position, title, instructions)
+    values (
+      reading_sheet_id,
+      1,
+      'Reading comprehension',
+      'Answer in complete sentences and support each response with evidence from the passage.'
+    ) returning id into reading_section_id;
+
+    insert into exam_questions (
+      section_id, position, prompt, answer_guide, marks, question_type, options, correct_option
+    ) values
+    (
+      reading_section_id,
+      1,
+      'In two or three sentences, explain the central idea of a passage about community libraries and identify one detail that supports it.',
+      'The answer should explain that community libraries provide shared access to knowledge and opportunity, with a relevant supporting detail such as free resources, study space, or digital access.',
+      5,
+      'short_answer',
+      '[]'::jsonb,
+      0
+    ),
+    (
+      reading_section_id,
+      2,
+      'Read the attached answer sheet and explain how the writer uses a transition to connect two ideas.',
+      'The answer should identify a transition such as however, therefore, or in addition and explain the relationship it creates between the surrounding ideas.',
+      5,
+      'short_answer',
+      '[]'::jsonb,
+      0
+    ),
+    (
+      reading_section_id,
+      3,
+      'Study the attached handwritten-style response and identify one grammatical strength and one improvement opportunity.',
+      'The answer should identify a real strength such as clear subject-verb agreement or precise vocabulary and a reasonable improvement such as punctuation, sentence variety, or word choice.',
+      5,
+      'short_answer',
+      '[]'::jsonb,
+      0
+    );
+  end if;
+
+  if not exists (
+    select 1 from exam_sheets
+    where title = 'Demo English Exam 2 — Writing and Critical Thinking'
+  ) then
+    insert into exam_sheets (title, subject, description, duration_minutes, status)
+    values (
+      'Demo English Exam 2 — Writing and Critical Thinking',
+      'English',
+      'A second Grade 12 English practice exam focused on argument, tone, and editing.',
+      40,
+      'published'
+    ) returning id into writing_sheet_id;
+
+    insert into exam_sheet_sections (sheet_id, position, title, instructions)
+    values (
+      writing_sheet_id,
+      1,
+      'Writing and editing',
+      'Write clearly, refer to the question, and explain your reasoning.'
+    ) returning id into writing_section_id;
+
+    insert into exam_questions (
+      section_id, position, prompt, answer_guide, marks, question_type, options, correct_option
+    ) values
+    (
+      writing_section_id,
+      1,
+      'Write a short argument for or against requiring students to complete a community-service project before graduation.',
+      'A strong response takes a clear position, gives at least two relevant reasons, and explains how the evidence supports the claim.',
+      8,
+      'short_answer',
+      '[]'::jsonb,
+      0
+    ),
+    (
+      writing_section_id,
+      2,
+      'Inspect the attached editing response and explain how the writer''s tone affects the reader.',
+      'The response should identify whether the tone is formal, urgent, optimistic, critical, or another defensible description and connect that tone to specific language choices.',
+      6,
+      'short_answer',
+      '[]'::jsonb,
+      0
+    ),
+    (
+      writing_section_id,
+      3,
+      'Read the attached revision sheet and propose one change that would make the conclusion more persuasive.',
+      'The answer should propose a specific revision such as restating the claim, adding a consequence, responding to a counterargument, or ending with a clear call to action.',
+      6,
+      'short_answer',
+      '[]'::jsonb,
+      0
+    );
+  end if;
+end
+$$;
