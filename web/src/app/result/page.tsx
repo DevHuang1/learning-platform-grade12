@@ -16,6 +16,7 @@ import {
   StatBox,
 } from "@/components/ui";
 import {
+  fetchAnswerReviews,
   fetchAnswersForSubmission,
   fetchExamSheet,
   fetchExamSheets,
@@ -26,7 +27,9 @@ import {
 import { QUESTION_TYPE_LABELS } from "@/lib/constants";
 import { EXAM_ANSWERS_BUCKET, getPublicUrl, QUESTION_IMAGES_BUCKET } from "@/lib/storage";
 import { cn } from "@/lib/utils";
+import { createClient, hasSupabase } from "@/lib/supabase";
 import type {
+  ExamAnswerReviewRow,
   ExamAnswerRow,
   ExamQuestionRow,
   ExamSectionRow,
@@ -37,6 +40,7 @@ import type {
 type Detail = {
   submission: ExamSubmissionRow;
   answers: ExamAnswerRow[];
+  reviews: ExamAnswerReviewRow[];
   sheet: ExamWithSections | null;
 };
 
@@ -94,24 +98,44 @@ function formatDate(iso: string) {
 }
 
 function AnswerMedia({ answer }: { answer: ExamAnswerRow }) {
-  const src = answer.image_path
-    ? getPublicUrl(EXAM_ANSWERS_BUCKET, answer.image_path)
-    : answer.image_url ?? null;
+  const src = answer.file_path
+    ? getPublicUrl(EXAM_ANSWERS_BUCKET, answer.file_path)
+    : answer.image_path
+      ? getPublicUrl(EXAM_ANSWERS_BUCKET, answer.image_path)
+      : answer.file_url || answer.image_url || null;
+  const isPdf =
+    answer.file_mime_type === "application/pdf" ||
+    answer.file_name?.toLowerCase().endsWith(".pdf");
 
   if (!src) {
     return (
       <div className="flex h-24 items-center justify-center border border-dashed border-gray-300 bg-gray-50 font-mono text-[11px] uppercase tracking-[0.08em] text-gray-400">
-        No image answer
+        No uploaded answer file
       </div>
+    );
+  }
+
+  if (isPdf) {
+    return (
+      <a
+        href={src}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-2 border border-indigo-100 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-800 transition hover:border-indigo-300 hover:bg-indigo-100"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-[0.08em]">PDF</span>
+        <span className="max-w-[18rem] truncate">{answer.file_name || "Open answer PDF"}</span>
+      </a>
     );
   }
 
   return (
     <div className="inline-block max-w-full overflow-hidden border border-gray-200 bg-gray-50">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt="Student answer"
-        className="max-h-32 w-auto max-w-full object-contain transition duration-300 ease-out hover:scale-[1.03]"
+        className="max-h-48 w-auto max-w-full object-contain transition duration-300 ease-out hover:scale-[1.03]"
       />
     </div>
   );
@@ -127,6 +151,7 @@ export default function ResultPage() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [marksInput, setMarksInput] = useState<Record<number, number>>({});
   const [saving, setSaving] = useState(false);
+  const [retryingAnswerId, setRetryingAnswerId] = useState<number | null>(null);
 
   const isTeacher = profile?.role === "teacher";
 
@@ -207,15 +232,55 @@ export default function ResultPage() {
       return;
     }
     const answers = await fetchAnswersForSubmission(sub.id);
+    const reviews = isTeacher
+      ? await fetchAnswerReviews(answers.map((answer) => answer.id))
+      : [];
     const sheet =
       sheetById.get(sub.sheet_id) ?? (await fetchExamSheet(sub.sheet_id));
+    const reviewByAnswer = new Map(reviews.map((review) => [review.answer_id, review]));
     const defaults: Record<number, number> = {};
     for (const a of answers) {
       const q = sheet ? buildQuestionMap(sheet).get(a.question_id) : undefined;
-      defaults[a.id] = a.marks_awarded ?? q?.marks ?? 0;
+      defaults[a.id] =
+        a.marks_awarded ?? reviewByAnswer.get(a.id)?.suggested_marks ?? 0;
     }
     setMarksInput(defaults);
-    setDetail({ submission: sub, answers, sheet: sheet ?? null });
+    setDetail({ submission: sub, answers, reviews, sheet: sheet ?? null });
+  };
+
+  const retryAnswer = async (answerId: number) => {
+    if (retryingAnswerId !== null) return;
+    setRetryingAnswerId(answerId);
+    try {
+      const response = await fetch("/api/exam/process-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answerId, force: true }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error || "Could not retry processing.");
+      }
+      setDetail((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          reviews: current.reviews.map((review) =>
+            review.answer_id === answerId
+              ? { ...review, processing_status: "processing", processing_error: null }
+              : review,
+          ),
+        };
+      });
+      success("Processing restarted", "The answer will be reviewed again in the background.");
+    } catch (err) {
+      error(
+        "Retry failed",
+        err instanceof Error ? err.message : "Could not retry processing.",
+      );
+    } finally {
+      setRetryingAnswerId(null);
+    }
   };
 
   const saveGrades = async () => {
@@ -234,9 +299,11 @@ export default function ResultPage() {
       setSubmissions(subs);
       const updated = subs.find((s) => s.id === detail.submission.id);
       const answers = await fetchAnswersForSubmission(detail.submission.id);
+      const reviews = await fetchAnswerReviews(answers.map((answer) => answer.id));
       setDetail({
         submission: updated ?? detail.submission,
         answers,
+        reviews,
         sheet: detail.sheet,
       });
       success("Grades saved", `Graded ${detail.submission.student_name}'s submission.`);
@@ -249,6 +316,52 @@ export default function ResultPage() {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    if (!isTeacher || !configured || !hasSupabase()) return;
+    const client = createClient();
+    const channel = client
+      .channel("exam-answer-reviews-teacher-results")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "exam_answer_reviews",
+        },
+        (payload) => {
+          const review = payload.new as Partial<ExamAnswerReviewRow>;
+          if (!review.answer_id) return;
+          void reload();
+          setDetail((current) => {
+            if (!current || !current.answers.some((answer) => answer.id === review.answer_id)) {
+              return current;
+            }
+            const nextReview = review as ExamAnswerReviewRow;
+            const existing = current.reviews.some((item) => item.answer_id === review.answer_id);
+            return {
+              ...current,
+              reviews: existing
+                ? current.reviews.map((item) =>
+                    item.answer_id === review.answer_id ? nextReview : item,
+                  )
+                : [...current.reviews, nextReview],
+              submission: {
+                ...current.submission,
+                status:
+                  review.processing_status === "processing"
+                    ? "processing"
+                    : current.submission.status,
+              },
+            };
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      void client.removeChannel(channel);
+    };
+  }, [configured, isTeacher, reload]);
 
   if (!configured) {
     return (
@@ -396,7 +509,11 @@ export default function ResultPage() {
                     <Badge
                       tone={sub.status === "graded" ? "green" : "amber"}
                     >
-                      {sub.status === "graded" ? "Graded" : "Submitted"}
+                      {sub.status === "graded"
+                        ? "Graded"
+                        : sub.status === "processing"
+                          ? "Processing"
+                          : "Submitted"}
                     </Badge>
                     <div className="mt-1 text-sm font-semibold text-gray-900">
                       {sub.obtained_marks} / {sheet?.total_marks ?? "?"}
@@ -429,9 +546,11 @@ export default function ResultPage() {
                       detail.submission.status === "graded" ? "green" : "amber"
                     }
                   >
-                    {detail.submission.status === "graded"
-                      ? "Graded"
-                      : "Submitted"}
+                      {detail.submission.status === "graded"
+                        ? "Graded"
+                        : detail.submission.status === "processing"
+                          ? "Processing"
+                          : "Submitted"}
                   </Badge>
                 </div>
                 <p className="text-sm text-gray-500">
@@ -439,6 +558,28 @@ export default function ResultPage() {
                   {" · "}
                   {formatDate(detail.submission.created_at)}
                 </p>
+                {isTeacher ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                    <span className="font-semibold text-gray-700">
+                      Transformer progress: {detail.reviews.filter((review) =>
+                        ["ready_for_review", "needs_review", "failed", "reviewed"].includes(
+                          review.processing_status,
+                        ),
+                      ).length}/{detail.answers.length} answers processed
+                    </span>
+                    <span>
+                      {detail.reviews.filter((review) => review.processing_status === "processing").length} processing
+                    </span>
+                    <span className="h-1.5 w-24 overflow-hidden rounded-full bg-gray-200">
+                      <span
+                        className="block h-full rounded-full bg-indigo-500 transition-[width] duration-300"
+                        style={{
+                          width: `${detail.answers.length ? Math.round((detail.reviews.filter((review) => ["ready_for_review", "needs_review", "failed", "reviewed"].includes(review.processing_status)).length / detail.answers.length) * 100) : 0}%`,
+                        }}
+                      />
+                    </span>
+                  </div>
+                ) : null}
               </div>
               <div className="text-right">
                 <div className="font-serif text-2xl font-bold text-indigo-600">
@@ -475,6 +616,7 @@ export default function ResultPage() {
                       )
                     : null;
                 const graded = detail.submission.status === "graded";
+                const review = detail.reviews.find((item) => item.answer_id === a.id);
                 return (
                   <div
                     key={a.id}
@@ -521,9 +663,45 @@ export default function ResultPage() {
                           {a.marks_awarded ?? 0} / {q?.marks ?? "?"}
                         </Badge>
                       ) : isTeacher ? (
-                        <div className="flex shrink-0 items-center gap-2">
+                        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                          {review ? (
+                            <Badge
+                              tone={
+                                review.processing_status === "failed"
+                                  ? "red"
+                                  : review.processing_status === "needs_review"
+                                    ? "amber"
+                                    : review.processing_status === "ready_for_review"
+                                      ? "indigo"
+                                      : "gray"
+                              }
+                            >
+                              {review.processing_status === "ready_for_review"
+                                ? "AI suggestion ready"
+                                : review.processing_status === "needs_review"
+                                  ? "Low confidence"
+                                  : review.processing_status === "failed"
+                                    ? "Processing failed"
+                                    : review.processing_status === "processing"
+                                      ? "Processing"
+                                      : "Queued"}
+                            </Badge>
+                          ) : (
+                            <Badge tone="gray">Not queued</Badge>
+                          )}
+                          {!review ? (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => retryAnswer(a.id)}
+                              disabled={retryingAnswerId === a.id}
+                            >
+                              {retryingAnswerId === a.id ? <Spinner /> : null}
+                              Process
+                            </Button>
+                          ) : null}
                           <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
-                            Marks
+                            Final marks
                           </label>
                           <input
                             type="number"
@@ -577,6 +755,47 @@ export default function ResultPage() {
                         </p>
                       ) : null}
                     </div>
+
+                    {isTeacher &&
+                    review &&
+                    (review.extracted_text || review.suggested_feedback || review.processing_error) ? (
+                      <div className="mt-3 border border-indigo-100 bg-indigo-50/60 px-3 py-3 text-sm text-indigo-950">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="font-semibold">Transformer suggestion</p>
+                          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-indigo-700">
+                            {review.model_confidence === null
+                              ? "Confidence unavailable"
+                              : `${Math.round(review.model_confidence * 100)}% confidence`}
+                          </span>
+                        </div>
+                        {review.extracted_text ? (
+                          <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-indigo-900">
+                            <span className="font-semibold">Transcription: </span>
+                            {review.extracted_text}
+                          </p>
+                        ) : null}
+                        {review.suggested_feedback ? (
+                          <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-indigo-900">
+                            <span className="font-semibold">Suggested feedback: </span>
+                            {review.suggested_feedback}
+                          </p>
+                        ) : null}
+                        {review.processing_status === "failed" ? (
+                          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-red-700">
+                            <span>{review.processing_error || "Processing failed."}</span>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => retryAnswer(a.id)}
+                              disabled={retryingAnswerId === a.id}
+                            >
+                              {retryingAnswerId === a.id ? <Spinner /> : null}
+                              Retry
+                            </Button>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
 
                     {graded && a.feedback ? (
                       <p className="mt-2 bg-gray-50 px-3 py-2 text-xs text-gray-600">

@@ -104,7 +104,7 @@ export type ExamSubmissionRow = {
   sheet_id: number;
   user_id: string | null;
   student_name: string;
-  status: "submitted" | "graded";
+  status: "submitted" | "processing" | "graded";
   obtained_marks: number;
   graded_by: string | null;
   created_at: string;
@@ -117,9 +117,39 @@ export type ExamAnswerRow = {
   text_answer: string | null;
   image_path: string | null;
   image_url: string | null;
+  file_path: string | null;
+  file_url: string | null;
+  file_name: string | null;
+  file_mime_type: string | null;
+  file_size: number | null;
   marks_awarded: number | null;
   feedback: string | null;
   created_at: string;
+};
+
+export type ExamAnswerReviewRow = {
+  id: number;
+  answer_id: number;
+  processing_status:
+    | "queued"
+    | "processing"
+    | "ready_for_review"
+    | "needs_review"
+    | "failed"
+    | "reviewed";
+  extracted_text: string | null;
+  suggested_marks: number | null;
+  suggested_feedback: string | null;
+  model_confidence: number | null;
+  model_name: string | null;
+  processing_error: string | null;
+  attempt_count: number;
+  started_at: string | null;
+  completed_at: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 // Composed exam with questions grouped by section, for the taker view.

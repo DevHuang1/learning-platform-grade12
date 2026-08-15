@@ -189,11 +189,43 @@ create table if not exists exam_answers (
   submission_id bigint not null references exam_submissions(id) on delete cascade,
   question_id bigint not null references exam_questions(id),
   text_answer text,
-  image_path text,           -- path inside the bucket
-  image_url text,            -- public URL for display
+  image_path text,           -- legacy image path inside the bucket
+  image_url text,            -- legacy public URL for display
+  file_path text,            -- PDF or image path inside the bucket
+  file_url text,             -- PDF or image URL for display
+  file_name text,
+  file_mime_type text,
+  file_size bigint,
   marks_awarded numeric(6,1),
   feedback text,
   created_at timestamptz not null default now()
+);
+
+-- Migrations for databases created before PDF/file answers were introduced.
+alter table exam_answers add column if not exists file_path text;
+alter table exam_answers add column if not exists file_url text;
+alter table exam_answers add column if not exists file_name text;
+alter table exam_answers add column if not exists file_mime_type text;
+alter table exam_answers add column if not exists file_size bigint;
+
+-- Teacher-only transformer output. Students never receive model suggestions.
+create table if not exists exam_answer_reviews (
+  id bigserial primary key,
+  answer_id bigint not null unique references exam_answers(id) on delete cascade,
+  processing_status text not null default 'queued', -- queued | processing | ready_for_review | needs_review | failed | reviewed
+  extracted_text text,
+  suggested_marks numeric(6,1),
+  suggested_feedback text,
+  model_confidence numeric(4,3),
+  model_name text,
+  processing_error text,
+  attempt_count int not null default 0,
+  started_at timestamptz,
+  completed_at timestamptz,
+  reviewed_at timestamptz,
+  reviewed_by text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 -- ============================================================
@@ -210,6 +242,23 @@ alter table exam_sheet_sections enable row level security;
 alter table exam_questions enable row level security;
 alter table exam_submissions enable row level security;
 alter table exam_answers enable row level security;
+alter table exam_answer_reviews enable row level security;
+
+-- Realtime sends teacher-only review updates to the results page.
+alter table exam_answer_reviews replica identity full;
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+    and not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'exam_answer_reviews'
+    ) then
+    alter publication supabase_realtime add table public.exam_answer_reviews;
+  end if;
+end
+$$;
 
 create or replace function public.is_teacher()
 returns boolean
@@ -293,6 +342,12 @@ create policy "answers insert own" on exam_answers for insert with check (
 );
 drop policy if exists "answers teacher update" on exam_answers;
 create policy "answers teacher update" on exam_answers for update using (public.is_teacher()) with check (public.is_teacher());
+
+-- Transformer results are visible only to teachers.
+drop policy if exists "answer reviews teacher select" on exam_answer_reviews;
+create policy "answer reviews teacher select" on exam_answer_reviews for select to authenticated using (public.is_teacher());
+drop policy if exists "answer reviews teacher update" on exam_answer_reviews;
+create policy "answer reviews teacher update" on exam_answer_reviews for update to authenticated using (public.is_teacher()) with check (public.is_teacher());
 
 -- ============================================================
 -- Storage buckets & policies
