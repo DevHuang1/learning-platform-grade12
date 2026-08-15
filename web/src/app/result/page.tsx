@@ -25,7 +25,7 @@ import {
   gradeSubmission,
 } from "@/lib/db";
 import { QUESTION_TYPE_LABELS } from "@/lib/constants";
-import { EXAM_ANSWERS_BUCKET, getPublicUrl, QUESTION_IMAGES_BUCKET } from "@/lib/storage";
+import { getPublicUrl, QUESTION_IMAGES_BUCKET } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { createClient, hasSupabase } from "@/lib/supabase";
 import type {
@@ -98,11 +98,10 @@ function formatDate(iso: string) {
 }
 
 function AnswerMedia({ answer }: { answer: ExamAnswerRow }) {
-  const src = answer.file_path
-    ? getPublicUrl(EXAM_ANSWERS_BUCKET, answer.file_path)
-    : answer.image_path
-      ? getPublicUrl(EXAM_ANSWERS_BUCKET, answer.image_path)
-      : answer.file_url || answer.image_url || null;
+  const hasFile = Boolean(answer.file_path || answer.image_path);
+  const src = hasFile
+    ? `/api/exam/answer-file?answerId=${encodeURIComponent(answer.id)}`
+    : null;
   const isPdf =
     answer.file_mime_type === "application/pdf" ||
     answer.file_name?.toLowerCase().endsWith(".pdf");

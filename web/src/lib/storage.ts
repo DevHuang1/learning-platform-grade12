@@ -7,7 +7,7 @@ export async function ensureBuckets() {
   if (!hasSupabase()) return { error: "Supabase not configured" };
   for (const bucket of [EXAM_ANSWERS_BUCKET, QUESTION_IMAGES_BUCKET]) {
     const { error } = await supabase.storage.createBucket(bucket, {
-      public: true,
+      public: bucket === QUESTION_IMAGES_BUCKET,
     });
     if (error && !error.message.includes("already exists")) {
       console.warn("createBucket", error.message);
@@ -23,7 +23,8 @@ export function getPublicUrl(bucket: string, path: string) {
 
 /**
  * Upload a file to a Supabase bucket. The caller stores the returned path as the
- * durable reference and can use the public URL for the existing display flows.
+ * durable reference. Question images may expose a public URL; answer files use
+ * the authenticated answer-file route instead.
  */
 export async function uploadAnswerFile(
   bucket: string,
@@ -32,7 +33,7 @@ export async function uploadAnswerFile(
 ): Promise<
   | {
       path: string;
-      publicUrl: string;
+      publicUrl: string | null;
       fileName: string;
       mimeType: string;
       fileSize: number;
@@ -52,7 +53,8 @@ export async function uploadAnswerFile(
   if (error) return { error: error.message };
   return {
     path: name,
-    publicUrl: getPublicUrl(bucket, name),
+    publicUrl:
+      bucket === EXAM_ANSWERS_BUCKET ? null : getPublicUrl(bucket, name),
     fileName: file.name,
     mimeType: file.type || "application/octet-stream",
     fileSize: file.size,
@@ -70,6 +72,7 @@ export async function uploadImage(
 ): Promise<{ path: string; publicUrl: string; error: null } | { error: string }> {
   const result = await uploadAnswerFile(bucket, folder, file);
   if (!("path" in result)) return result;
+  if (!result.publicUrl) return { error: "Question image URL is unavailable." };
   return { path: result.path, publicUrl: result.publicUrl, error: null };
 }
 
