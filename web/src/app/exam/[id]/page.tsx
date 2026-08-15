@@ -9,14 +9,13 @@ import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
 import { QUESTION_TYPE_LABELS } from "@/lib/constants";
-import { checkAnswer } from "@/lib/utils";
 import { fetchExamSheet, insertAnswer, insertSubmission } from "@/lib/db";
 import {
   ensureBuckets,
   EXAM_ANSWERS_BUCKET,
   getPublicUrl,
   QUESTION_IMAGES_BUCKET,
-  uploadImage,
+  uploadAnswerFile,
 } from "@/lib/storage";
 import { hasSupabase } from "@/lib/supabase";
 import type {
@@ -32,6 +31,17 @@ type FlatQuestion = {
 };
 
 const NAME_KEY = "g12_student_name";
+
+function isAnswerImage(file: File | null) {
+  return Boolean(
+    file &&
+      (file.type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(file.name)),
+  );
+}
+
+function isAnswerPdf(file: File | null) {
+  return Boolean(file && (file.type === "application/pdf" || /\.pdf$/i.test(file.name)));
+}
 
 function UploadIcon() {
   return (
@@ -181,12 +191,21 @@ export default function TakeExamPage() {
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!isAnswerPdf(file) && !isAnswerImage(file)) {
+      setSubmitError("Only PDF and image files are accepted.");
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      setSubmitError("Files must be 12 MB or smaller.");
+      return;
+    }
     if (currentPreview) URL.revokeObjectURL(currentPreview);
+    setSubmitError(null);
     setCurrentFile(file);
-    setCurrentPreview(URL.createObjectURL(file));
+    setCurrentPreview(isAnswerImage(file) ? URL.createObjectURL(file) : null);
   }
 
-  function handleRemoveImage() {
+  function handleRemoveFile() {
     if (currentPreview) URL.revokeObjectURL(currentPreview);
     setCurrentFile(null);
     setCurrentPreview(null);
@@ -235,49 +254,59 @@ export default function TakeExamPage() {
           if (sub) setSubmissionId(sub.id);
         }
         if (!sub) throw new Error("Could not create submission");
-        let imagePath: string | null = null;
-        let imageUrl: string | null = null;
+        let filePath: string | null = null;
+        let fileUrl: string | null = null;
+        let fileName: string | null = null;
+        let fileMimeType: string | null = null;
+        let fileSize: number | null = null;
         if (currentFile) {
-          const res = await uploadImage(
+          const res = await uploadAnswerFile(
             EXAM_ANSWERS_BUCKET,
             `submission-${sub.id}`,
             currentFile,
           );
           if (!("path" in res)) throw new Error(res.error);
-          imagePath = res.path;
-          imageUrl = res.publicUrl;
+          filePath = res.path;
+          fileUrl = res.publicUrl;
+          fileName = res.fileName;
+          fileMimeType = res.mimeType;
+          fileSize = res.fileSize;
         }
-        // Check answer and award marks (case-insensitive, ignore whitespace)
-        const isCorrect = await checkAnswer(q.question, currentText.trim());
-        const marksAwarded = isCorrect ? q.question.marks : 0;
-        await insertAnswer({
+        const answer = await insertAnswer({
           submission_id: sub.id,
           question_id: q.question.id,
           text_answer: isChoiceType
             ? currentChoice || null
             : currentText.trim() || null,
-          image_path: imagePath,
-          image_url: imageUrl,
-          marks_awarded: marksAwarded,
+          image_path: isAnswerImage(currentFile) ? filePath : null,
+          image_url: isAnswerImage(currentFile) ? fileUrl : null,
+          file_path: filePath,
+          file_url: fileUrl,
+          file_name: fileName,
+          file_mime_type: fileMimeType,
+          file_size: fileSize,
+          marks_awarded: null,
         });
-        // Show feedback
-        if (isCorrect) {
-          toast.success(
-            "Correct answer! " + q.question.marks + " marks awarded.",
-          );
-        } else {
-          toast.error(
-            "Incorrect. The expected answer is: " +
-              (q.question.answer_guide || ""),
-            " " + q.question.marks + " marks available.",
-          );
+        if (answer) {
+          void fetch("/api/exam/process-answer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ answerId: answer.id }),
+          }).catch(() => undefined);
         }
+        toast.success(
+          "Answer saved for teacher review.",
+          currentFile
+            ? "The uploaded file will be processed in the background."
+            : "A review suggestion will appear in the teacher dashboard.",
+        );
       }
       if (currentIndex + 1 >= flatQuestions.length) {
         setFinished(true);
       } else {
         setCurrentIndex((i) => i + 1);
         setCurrentText("");
+        if (currentPreview) URL.revokeObjectURL(currentPreview);
         setCurrentFile(null);
         setCurrentPreview(null);
       }
@@ -518,11 +547,11 @@ export default function TakeExamPage() {
 
                 <div className="mt-4">
                   <label className="mb-1 block font-mono text-[11px] uppercase tracking-[0.08em] text-gray-700">
-                    Upload a photo of your written answer
+                    Upload a PDF or image answer (optional)
                   </label>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="application/pdf,image/*"
                     onChange={handleFile}
                     className="block w-full text-sm text-gray-500 file:mr-3 file:cursor-pointer file:border-0 file:bg-indigo-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200"
                   />
@@ -536,8 +565,8 @@ export default function TakeExamPage() {
                           className="max-h-72 w-full object-contain bg-gray-50"
                         />
                         <button
-                          onClick={handleRemoveImage}
-                          aria-label="Remove image"
+                          onClick={handleRemoveFile}
+                          aria-label="Remove uploaded file"
                           className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center bg-gray-900/70 text-white transition-colors hover:bg-red-600"
                         >
                           <XIcon />
@@ -547,10 +576,26 @@ export default function TakeExamPage() {
                         Attached image — remove it if you picked the wrong file.
                       </p>
                     </div>
+                  ) : currentFile ? (
+                    <div className="mt-3 flex items-center justify-between gap-3 border border-indigo-100 bg-indigo-50 px-3 py-3 text-sm text-indigo-900">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{currentFile.name}</p>
+                        <p className="text-xs text-indigo-700">
+                          PDF · {(currentFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="shrink-0 text-xs font-bold uppercase tracking-[0.08em] text-indigo-700 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   ) : (
                     <p className="mt-2 text-xs text-gray-400">
-                      JPG or PNG — your photo will be stored securely with your
-                      answer.
+                      PDF, JPG, PNG, or WEBP up to 12 MB. A teacher will review
+                      the transformer suggestion before grades are saved.
                     </p>
                   )}
                 </div>

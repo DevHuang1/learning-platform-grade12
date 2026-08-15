@@ -1,5 +1,6 @@
 import { hasSupabase, supabase } from "./supabase";
 import type {
+  ExamAnswerReviewRow,
   ExamAnswerRow,
   ExamQuestionRow,
   ExamScheduleRow,
@@ -350,7 +351,12 @@ export async function insertAnswer(a: {
   text_answer?: string | null;
   image_path?: string | null;
   image_url?: string | null;
-  marks_awarded?: number;
+  file_path?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_mime_type?: string | null;
+  file_size?: number | null;
+  marks_awarded?: number | null;
 }): Promise<ExamAnswerRow | null> {
   if (!hasSupabase()) return null;
   const { data, error } = await supabase
@@ -397,8 +403,21 @@ export async function fetchAnswersForSubmission(
   const { data } = await supabase
     .from("exam_answers")
     .select("*")
-    .eq("submission_id", submissionId);
-  return data || [];
+    .eq("submission_id", submissionId)
+    .order("created_at", { ascending: true });
+  return (data as ExamAnswerRow[]) || [];
+}
+
+export async function fetchAnswerReviews(
+  answerIds: number[],
+): Promise<ExamAnswerReviewRow[]> {
+  if (!hasSupabase() || answerIds.length === 0) return [];
+  const { data, error } = await supabase
+    .from("exam_answer_reviews")
+    .select("*")
+    .in("answer_id", answerIds);
+  if (error) throw new Error(error.message);
+  return (data as ExamAnswerReviewRow[]) || [];
 }
 
 export async function gradeSubmission(
