@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run tests/answer-processing.test.ts tests/rls-policy.test.ts",
+    "test:live": "vitest run tests/rls-live.test.ts",
     "demo:seed": "node supabase/demo-seed.js"
   },
   "dependencies": {
@@ -30,6 +32,7 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.3.0",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
   }
 }
