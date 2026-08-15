@@ -448,25 +448,50 @@ export default function DashboardPage() {
   return (
     <Shell>
       {!configured ? (
-        <Card className="border-amber-200 bg-amber-50">
-          <p className="text-sm font-semibold text-amber-800">
-            Running offline — analytics disabled
-          </p>
-          <p className="mt-1 text-sm leading-6 text-amber-700">
-            The Quiz still works locally, but saving progress and analytics need
-            Supabase. Add{" "}
-            <code className="rounded bg-amber-100 px-1">
-              NEXT_PUBLIC_SUPABASE_URL
-            </code>{" "}
-            and{" "}
-            <code className="rounded bg-amber-100 px-1">
-              NEXT_PUBLIC_SUPABASE_ANON_KEY
-            </code>{" "}
-            to your{" "}
-            <code className="rounded bg-amber-100 px-1">.env.local</code> file,
-            then restart the dev server.
-          </p>
-        </Card>
+        <div className="mx-auto max-w-5xl space-y-6">
+          <Card className="border-amber-200 bg-amber-50/80 shadow-none">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                <span className="text-sm font-bold">i</span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-amber-900">
+                  You’re working in offline mode
+                </p>
+                <p className="mt-1 text-sm leading-6 text-amber-800">
+                  Quiz practice is available now and progress is stored on this
+                  device. Connect Supabase later to unlock analytics, exams,
+                  schedules, and shared results.
+                </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="overflow-hidden border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-0">
+            <div className="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600">
+                  G12 Learning Platform
+                </p>
+                <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+                  Build your vocabulary, one question at a time.
+                </h1>
+                <p className="mt-3 max-w-lg text-sm leading-6 text-slate-600 sm:text-base">
+                  Practice all 12 units with quick feedback, adjustable
+                  difficulty, and a local history you can revisit anytime.
+                </p>
+              </div>
+              <div className="shrink-0">
+                <Link href="/quiz">
+                  <Button size="lg">
+                    <BoltIcon className="h-4 w-4" />
+                    Open Quiz
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </Card>
+        </div>
       ) : signedOut ? (
         <div className="flex min-h-[60vh] items-center justify-center">
           <Card className="w-full max-w-sm text-center">
@@ -551,12 +576,12 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="mx-auto max-w-7xl space-y-6">
           <section>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-                  {greeting()}, {firstName || "there"} 👋
+                  <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+                  {greeting()}, {firstName || "there"}
                 </h1>
                 <p className="mt-1 text-sm text-gray-500">
                   {todayLabel} · {isTeacher ? "Teacher overview" : "Your progress"}
@@ -590,11 +615,11 @@ export default function DashboardPage() {
           </section>
 
           {showOnboard && (
-            <div className="rounded-2xl bg-gradient-to-r from-brand-700 to-accent-600 p-5 text-white shadow-sm">
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 p-5 text-white shadow-lg shadow-indigo-200/50">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="text-base font-bold">Getting started</h2>
-                  <p className="mt-0.5 text-sm text-brand-100">
+                  <p className="mt-0.5 text-sm text-indigo-100">
                     Three easy steps to start learning on G12.
                   </p>
                 </div>
@@ -938,9 +963,10 @@ export default function DashboardPage() {
                     <button
                       key={subject}
                       type="button"
+                      aria-pressed={subjectFilter === subject}
                       onClick={() => setSubjectFilter(subject)}
                       className={cn(
-                        "rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
+                        "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
                         subjectFilter === subject
                           ? "bg-indigo-600 text-white"
                           : "bg-stone-100 text-stone-600 hover:bg-stone-200",
@@ -965,9 +991,9 @@ export default function DashboardPage() {
                       return (
                         <div
                           key={s.id}
-                          className="flex items-center gap-3 rounded-xl border border-gray-200 p-3"
+                          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3"
                         >
-                          <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-indigo-600 text-white">
+                          <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
                             <span className="text-sm font-bold leading-none">
                               {badge.day}
                             </span>

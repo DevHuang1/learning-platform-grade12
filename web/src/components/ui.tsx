@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-none border border-stone-200 bg-white p-5",
+        "rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_10px_30px_-24px_rgba(15,23,42,0.45)]",
         className,
       )}
     >
@@ -21,9 +21,9 @@ export function Card({
 
 const BUTTON_VARIANTS: Record<string, string> = {
   primary:
-    "bg-ink text-cream hover:bg-neutral-800 focus-visible:outline-indigo-700",
+    "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 focus-visible:outline-indigo-700",
   secondary:
-    "border border-neutral-200 bg-white text-ink-2 hover:bg-neutral-100 focus-visible:outline-neutral-400",
+    "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-slate-400",
   danger:
     "bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600",
   ghost:
@@ -54,7 +54,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-none font-mono text-xs uppercase tracking-[0.08em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-sans text-sm font-semibold transition-[background-color,border-color,color,box-shadow,transform] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 hover:shadow-sm active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
         className,
@@ -98,7 +98,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-none px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.09em]",
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide",
         tones[tone],
         className,
       )}
@@ -120,18 +120,18 @@ export function StatBox({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-none border border-stone-200 bg-white p-4 text-center">
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-[0_10px_30px_-24px_rgba(15,23,42,0.45)]">
       {icon && (
-        <div className="mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-none bg-stone-50 text-stone-400">
+        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
           {icon}
         </div>
       )}
       <div
-        className={`font-serif text-2xl font-semibold ${accent || "text-stone-900"}`}
+        className={`text-2xl font-bold tracking-tight ${accent || "text-slate-900"}`}
       >
         {value}
       </div>
-      <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted">
+      <div className="mt-1 text-xs font-medium text-slate-500">
         {label}
       </div>
     </div>
@@ -140,7 +140,7 @@ export function StatBox({
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse rounded-none bg-stone-200", className)} />
+    <div className={cn("animate-pulse rounded-xl bg-slate-200", className)} />
   );
 }
 
@@ -158,11 +158,11 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-none border border-dashed border-stone-300 bg-stone-50/60 px-6 py-10 text-center",
+        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 px-6 py-10 text-center",
         className,
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-none bg-white text-stone-300">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-300 shadow-sm">
         <svg
           viewBox="0 0 24 24"
           className="h-6 w-6"
@@ -213,7 +213,7 @@ export function ConfirmDialog({
         className="absolute inset-0 bg-stone-900/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm rounded-none border border-stone-200 bg-white p-5">
+      <div className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
         <h3 className="pr-6 font-serif text-lg font-semibold text-ink">
           {title}
         </h3>
@@ -234,7 +234,7 @@ export function ConfirmDialog({
         <button
           aria-label="Close dialog"
           onClick={onClose}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-none text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
         >
           <svg
             viewBox="0 0 24 24"
@@ -269,7 +269,7 @@ export function Avatar({
   return (
     <span
       className={cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-none bg-ink text-xs font-bold text-cream",
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white",
         className,
       )}
     >

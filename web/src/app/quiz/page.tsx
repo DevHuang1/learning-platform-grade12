@@ -398,9 +398,9 @@ export default function QuizPage() {
 
   return (
     <Shell>
-      <div className="space-y-4">
+      <div className="mx-auto max-w-4xl space-y-5">
         {!configured && (
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-amber-200 bg-amber-50/80 shadow-none">
             <p className="text-sm font-semibold text-amber-700">
               Supabase is not configured
             </p>
@@ -411,7 +411,7 @@ export default function QuizPage() {
           </Card>
         )}
         {configured && !user && (
-          <Card className="border-indigo-200 bg-indigo-50">
+          <Card className="border-indigo-200 bg-indigo-50/80 shadow-none">
             <div className="flex items-start gap-3">
               <p className="text-sm font-semibold text-indigo-700">
                 Sign in to save your progress to the cloud
@@ -442,7 +442,7 @@ export default function QuizPage() {
                       e.target.value === "all" ? "all" : Number(e.target.value),
                     )
                   }
-                  className="w-full appearance-none border border-gray-300 bg-white py-2.5 pl-9 pr-9 text-sm font-medium text-gray-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm font-medium text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100"
                 >
                   <option value="all">All Units</option>
                   {UNITS.map((u) => (
@@ -591,7 +591,7 @@ export default function QuizPage() {
                   }}
                   disabled={solved}
                   placeholder="Type the English word..."
-                  className="min-w-0 flex-1 border border-gray-300 bg-white px-4 py-3 text-base font-medium text-gray-800 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:bg-gray-50 disabled:text-gray-500"
+                  className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-medium text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-500"
                 />
                 <Button
                   size="lg"
@@ -617,7 +617,7 @@ export default function QuizPage() {
               {feedback && (
                 <div
                   className={cn(
-                    "mt-4 border p-4 text-sm leading-6",
+                    "mt-4 rounded-xl border p-4 text-sm leading-6",
                     feedback.ok
                       ? "border-emerald-200 bg-emerald-50 text-emerald-900"
                       : "border-red-200 bg-red-50 text-red-900",
@@ -690,7 +690,7 @@ export default function QuizPage() {
                 <div
                   key={i}
                   className={cn(
-                    "border p-3",
+                    "rounded-xl border p-4",
                     h.ok
                       ? "border-emerald-200 bg-emerald-50/60"
                       : "border-red-200 bg-red-50/60",
@@ -749,7 +749,7 @@ export default function QuizPage() {
                   <div
                     key={h.id}
                     className={cn(
-                      "border p-3",
+                      "rounded-xl border p-4",
                       h.ok
                         ? "border-emerald-200 bg-emerald-50/60"
                         : "border-red-200 bg-red-50/60",

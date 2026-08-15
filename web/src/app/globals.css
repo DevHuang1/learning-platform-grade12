@@ -108,9 +108,13 @@
 
 :root {
   --premium-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --bg: #ffffff;
-  --ink: #0f172a;
+  --bg: #f6f8fb;
+  --ink: #122033;
   --accent: #4f46e5;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --line: #e2e8f0;
+  --muted: #64748b;
 }
 
 html,
@@ -121,10 +125,29 @@ body {
 
 body {
   font-family: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
   line-height: 1.5;
   color: var(--ink);
 }
+
+button,
+a,
+select,
+input,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active:not(:disabled),
+a:active {
+  transform: scale(0.98);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 
 ::selection {
   background: #4f46e5;
@@ -255,4 +278,19 @@ body {
 
 .accordion-panel > div {
   overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

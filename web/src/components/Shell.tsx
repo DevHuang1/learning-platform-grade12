@@ -99,9 +99,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex min-h-screen bg-slate-50">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-neutral-200 bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white shadow-[8px_0_24px_-24px_rgba(15,23,42,0.45)] lg:flex">
         <SidebarContent
           displayName={displayName}
           isTeacher={isTeacher}
@@ -117,12 +117,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             className="absolute inset-0 bg-black/40"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-neutral-200 bg-white">
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-slate-200 bg-white shadow-2xl">
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close menu"
-              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-none text-stone-500 transition-colors hover:bg-stone-100"
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -148,11 +148,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       {/* Main column */}
       <div className="flex min-h-screen w-full flex-col lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-stone-200 bg-cream/80 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-[72px] items-center justify-between gap-3 border-b border-slate-200/80 bg-slate-50/85 px-4 backdrop-blur supports-[backdrop-filter]:bg-slate-50/75 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="shrink-0 rounded-none p-2 text-stone-500 hover:bg-stone-100 lg:hidden"
+              className="shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
               aria-label="Open menu"
             >
               <svg
@@ -182,7 +182,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="flex h-9 w-9 items-center justify-center rounded-none bg-ink text-sm font-bold text-cream"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm"
                 >
                   {initials(displayName)}
                 </button>
@@ -192,7 +192,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                       className="fixed inset-0 z-10"
                       onClick={() => setMenuOpen(false)}
                     />
-                    <div className="absolute right-0 z-20 mt-2 w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-none border border-stone-200 bg-white">
+                    <div className="absolute right-0 z-20 mt-2 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
                       <div className="border-b border-stone-100 px-4 py-3">
                         <p className="font-serif text-sm font-semibold text-stone-900">
                           {profile?.full_name || "Student"}
@@ -206,13 +206,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                           setMenuOpen(false);
                           router.push("/schedule");
                         }}
-                        className="block w-full px-4 py-2.5 text-left font-mono text-[11px] uppercase tracking-[0.08em] text-stone-700 hover:bg-stone-50"
+                        className="block w-full px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
                       >
                         Schedule
                       </button>
                       <button
                         onClick={handleSignOut}
-                        className="block w-full px-4 py-2.5 text-left font-mono text-[11px] uppercase tracking-[0.08em] text-red-600 hover:bg-red-50"
+                        className="block w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50"
                       >
                         Sign out
                       </button>
@@ -224,7 +224,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-10">{children}</main>
       </div>
     </div>
   );
@@ -244,8 +244,8 @@ function SidebarContent({
   const groups = isTeacher ? [...NAV, ...TEACHER_NAV] : NAV;
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b border-stone-200 px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-ink text-cream">
+      <div className="flex items-center gap-3 border-b border-slate-200/80 px-5 py-5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
           <svg
             viewBox="0 0 24 24"
             className="h-6 w-6"
@@ -266,10 +266,10 @@ function SidebarContent({
           <p className="label truncate text-stone-500">{displayName}</p>
         </div>
       </div>
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-7 overflow-y-auto px-3 py-5">
         {groups.map((g) => (
           <div key={g.section}>
-            <p className="mb-1.5 px-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
               {g.section}
             </p>
             <div className="space-y-0.5">
@@ -281,10 +281,10 @@ function SidebarContent({
                     href={item.href}
                     onClick={onNavigate}
                     className={cn(
-                      "flex items-center gap-3 rounded-none border-l-2 border-transparent px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors",
+                      "flex items-center gap-3 rounded-xl border-l-4 border-transparent px-3 py-3 text-sm font-semibold transition-[background-color,border-color,color,box-shadow]",
                       active
-                        ? "border-indigo-700 bg-indigo-50 text-indigo-700"
-                        : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+                        ? "border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                     )}
                   >
                     {item.icon}
@@ -296,8 +296,8 @@ function SidebarContent({
           </div>
         ))}
       </nav>
-      <div className="border-t border-stone-200 p-3">
-        <p className="label px-3 py-2 text-stone-500">
+      <div className="border-t border-slate-200/80 p-3">
+        <p className="px-3 py-2 text-xs font-medium text-slate-500">
           Study with me · G12 English
         </p>
       </div>
