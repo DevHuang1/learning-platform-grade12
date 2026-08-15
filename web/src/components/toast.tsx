@@ -87,17 +87,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             onClick={() => dismiss(t.id)}
             className={cn(
-              "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-none border border-stone-200 bg-white px-4 py-3 text-left transition-colors",
+              "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-lg transition-[background-color,border-color,box-shadow,transform] hover:shadow-xl active:scale-[0.98]",
               TONES[t.tone].ring,
             )}
           >
             <span className="mt-0.5 shrink-0">{TONES[t.tone].icon}</span>
             <span className="min-w-0">
-              <span className="block text-xs font-mono uppercase tracking-[0.08em] text-ink">
+              <span className="block text-sm font-semibold text-slate-900">
                 {t.title}
               </span>
               {t.description && (
-                <span className="mt-1 block text-[11px] font-mono leading-[1.9] text-muted">
+                <span className="mt-1 block text-sm leading-6 text-slate-500">
                   {t.description}
                 </span>
               )}
