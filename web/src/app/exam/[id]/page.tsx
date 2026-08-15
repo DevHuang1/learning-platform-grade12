@@ -287,19 +287,32 @@ export default function TakeExamPage() {
           file_size: fileSize,
           marks_awarded: null,
         });
+        let processingQueued = false;
         if (answer) {
-          void fetch("/api/exam/process-answer", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ answerId: answer.id }),
-          }).catch(() => undefined);
+          try {
+            const response = await fetch("/api/exam/process-answer", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ answerId: answer.id }),
+            });
+            processingQueued = response.ok;
+          } catch {
+            processingQueued = false;
+          }
         }
-        toast.success(
-          "Answer saved for teacher review.",
-          currentFile
-            ? "The uploaded file will be processed in the background."
-            : "A review suggestion will appear in the teacher dashboard.",
-        );
+        if (processingQueued) {
+          toast.success(
+            "Answer saved for teacher review.",
+            currentFile
+              ? "The uploaded file is processing in the background."
+              : "A review suggestion will appear in the teacher dashboard.",
+          );
+        } else {
+          toast.error(
+            "Answer saved, but processing is pending.",
+            "A teacher can retry processing from the Results screen.",
+          );
+        }
       }
       if (currentIndex + 1 >= flatQuestions.length) {
         setFinished(true);

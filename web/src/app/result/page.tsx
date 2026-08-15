@@ -686,6 +686,19 @@ export default function ResultPage() {
                                       ? "Processing"
                                       : "Queued"}
                             </Badge>
+                          ) : (
+                            <Badge tone="gray">Not queued</Badge>
+                          )}
+                          {!review ? (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => retryAnswer(a.id)}
+                              disabled={retryingAnswerId === a.id}
+                            >
+                              {retryingAnswerId === a.id ? <Spinner /> : null}
+                              Process
+                            </Button>
                           ) : null}
                           <label className="font-mono text-[11px] uppercase tracking-[0.08em] text-gray-500">
                             Final marks
