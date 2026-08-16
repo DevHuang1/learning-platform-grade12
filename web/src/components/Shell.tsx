@@ -68,7 +68,13 @@ function initials(name: string) {
     .join("");
 }
 
-export default function Shell({ children }: { children: React.ReactNode }) {
+export default function Shell({
+  children,
+  theme = "light",
+}: {
+  children: React.ReactNode;
+  theme?: "light" | "dark";
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, profile, configured, signOut } = useAuth();
@@ -99,7 +105,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div
+      className={cn(
+        "dashboard-shell flex min-h-screen bg-slate-50",
+        theme === "dark" && "dashboard-shell-dark",
+      )}
+    >
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white shadow-[8px_0_24px_-24px_rgba(15,23,42,0.45)] lg:flex">
         <SidebarContent
