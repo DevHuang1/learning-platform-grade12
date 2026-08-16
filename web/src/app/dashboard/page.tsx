@@ -69,6 +69,7 @@ const MONTHS = [
 ];
 
 const ONBOARD_KEY = "g12_onboard_done";
+const DASHBOARD_THEME_KEY = "g12_dashboard_theme";
 
 function greeting() {
   const h = new Date().getHours();
@@ -276,6 +277,41 @@ function CheckIcon({ className }: { className?: string }) {
   );
 }
 
+function MoonIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20.4 15.5A8.8 8.8 0 0 1 8.5 3.6 8.8 8.8 0 1 0 20.4 15.5Z" />
+    </svg>
+  );
+}
+
+function SunIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+  );
+}
+
 export default function DashboardPage() {
   const { user, profile, loading: authLoading, configured } = useAuth();
   const isTeacher = profile?.role === "teacher";
@@ -296,6 +332,16 @@ export default function DashboardPage() {
     if (typeof window === "undefined") return true;
     return localStorage.getItem(ONBOARD_KEY) === "1";
   });
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem(DASHBOARD_THEME_KEY);
+    if (savedTheme === "dark" || savedTheme === "light") {
+      setIsDarkMode(savedTheme === "dark");
+      return;
+    }
+    setIsDarkMode(window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }, []);
 
   useEffect(() => {
     if (!configured || authLoading) return;
@@ -366,6 +412,21 @@ export default function DashboardPage() {
     () => unitProgress(history, unitTitles ?? undefined),
     [history, unitTitles],
   );
+  const chartColors = isDarkMode
+    ? {
+        grid: "#334155",
+        tick: "#94a3b8",
+        tooltipBackground: "#0f172a",
+        tooltipBorder: "#334155",
+        tooltipText: "#e2e8f0",
+      }
+    : {
+        grid: "#e7e5e4",
+        tick: "#a8a29e",
+        tooltipBackground: "#ffffff",
+        tooltipBorder: "#e7e5e4",
+        tooltipText: "#1f2937",
+      };
 
   const upcoming = useMemo(
     () =>
@@ -445,10 +506,35 @@ export default function DashboardPage() {
     setOnboardDone(true);
   }
 
+  function toggleDarkMode() {
+    setIsDarkMode((current) => {
+      const next = !current;
+      try {
+        localStorage.setItem(DASHBOARD_THEME_KEY, next ? "dark" : "light");
+      } catch {}
+      return next;
+    });
+  }
+
   return (
-    <Shell>
+    <Shell theme={isDarkMode ? "dark" : "light"}>
+      <div className={cn("dashboard-theme min-h-full", isDarkMode && "dashboard-theme-dark")}>
       {!configured ? (
         <div className="mx-auto max-w-5xl space-y-6">
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              className="dashboard-theme-toggle"
+              onClick={toggleDarkMode}
+              aria-pressed={isDarkMode}
+              aria-label={isDarkMode ? "Switch dashboard to light mode" : "Switch dashboard to dark mode"}
+            >
+              {isDarkMode ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+              {isDarkMode ? "Light mode" : "Dark mode"}
+            </Button>
+          </div>
           <Card className="border-amber-200 bg-amber-50/80 shadow-none">
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
@@ -591,6 +677,19 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  className="dashboard-theme-toggle"
+                  onClick={toggleDarkMode}
+                  aria-pressed={isDarkMode}
+                  aria-label={isDarkMode ? "Switch dashboard to light mode" : "Switch dashboard to dark mode"}
+                >
+                  {isDarkMode ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
+                  <span className="hidden sm:inline">{isDarkMode ? "Light mode" : "Dark mode"}</span>
+                  <span className="sm:hidden">Theme</span>
+                </Button>
                 <Link href="/quiz">
                   <Button size="md">
                     <BoltIcon className="h-4 w-4" />
@@ -803,18 +902,18 @@ export default function DashboardPage() {
                         <CartesianGrid
                           strokeDasharray="3 3"
                           vertical={false}
-                          stroke="#e7e5e4"
+                          stroke={chartColors.grid}
                         />
                         <XAxis
                           dataKey="label"
-                          tick={{ fontSize: 11, fill: "#a8a29e" }}
+                          tick={{ fontSize: 11, fill: chartColors.tick }}
                           axisLine={false}
                           tickLine={false}
                           interval={1}
                         />
                         <YAxis
                           domain={[0, 100]}
-                          tick={{ fontSize: 11, fill: "#a8a29e" }}
+                          tick={{ fontSize: 11, fill: chartColors.tick }}
                           axisLine={false}
                           tickLine={false}
                           tickFormatter={(v: number) => `${v}%`}
@@ -822,12 +921,14 @@ export default function DashboardPage() {
                         <Tooltip
                           contentStyle={{
                             borderRadius: 12,
-                            border: "1px solid #e7e5e4",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                            border: `1px solid ${chartColors.tooltipBorder}`,
+                            background: chartColors.tooltipBackground,
+                            color: chartColors.tooltipText,
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.16)",
                             fontSize: 12,
                           }}
                           formatter={(value) => [`${value}%`, "Accuracy"]}
-                          labelStyle={{ fontWeight: 600 }}
+                          labelStyle={{ fontWeight: 600, color: chartColors.tooltipText }}
                         />
                         <Area
                           type="monotone"
@@ -881,13 +982,15 @@ export default function DashboardPage() {
                           <Tooltip
                             contentStyle={{
                               borderRadius: 12,
-                              border: "1px solid #e7e5e4",
-                              fontSize: 12,
+                            border: `1px solid ${chartColors.tooltipBorder}`,
+                            background: chartColors.tooltipBackground,
+                            color: chartColors.tooltipText,
+                            fontSize: 12,
                             }}
                           />
                           <Legend
                             iconType="circle"
-                            wrapperStyle={{ fontSize: 12 }}
+                            wrapperStyle={{ fontSize: 12, color: chartColors.tick }}
                           />
                         </PieChart>
                       </ResponsiveContainer>
@@ -1095,6 +1198,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      </div>
     </Shell>
   );
 }

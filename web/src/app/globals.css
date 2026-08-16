@@ -294,3 +294,131 @@ a:active {
     scroll-behavior: auto !important;
   }
 }
+
+/* Dashboard-only dark mode. The shell and page flags keep the theme isolated from other learning routes. */
+.dashboard-shell-dark {
+  background: #0b1220;
+  color: #e2e8f0;
+}
+
+.dashboard-shell-dark > aside,
+.dashboard-shell-dark header {
+  border-color: #26344a !important;
+  background: rgba(15, 23, 42, 0.94) !important;
+  color: #e2e8f0;
+}
+
+.dashboard-shell-dark .dashboard-theme,
+.dashboard-shell-dark main {
+  background: #0b1220;
+}
+
+.dashboard-shell-dark .text-stone-900,
+.dashboard-shell-dark .text-slate-950,
+.dashboard-theme-dark .text-gray-900,
+.dashboard-theme-dark .text-slate-900,
+.dashboard-theme-dark .text-slate-950,
+.dashboard-theme-dark .text-stone-900 {
+  color: #f8fafc !important;
+}
+
+.dashboard-shell-dark .text-slate-600,
+.dashboard-shell-dark .text-slate-500,
+.dashboard-shell-dark .text-stone-500,
+.dashboard-theme-dark .text-gray-600,
+.dashboard-theme-dark .text-gray-500,
+.dashboard-theme-dark .text-gray-400,
+.dashboard-theme-dark .text-slate-500 {
+  color: #a8b7cc !important;
+}
+
+.dashboard-shell-dark .bg-white,
+.dashboard-theme-dark .bg-white,
+.dashboard-theme-dark .bg-slate-50,
+.dashboard-theme-dark .bg-slate-100,
+.dashboard-theme-dark .bg-stone-100,
+.dashboard-theme-dark [class*="bg-slate-50/"] {
+  background-color: #111c2e !important;
+}
+
+.dashboard-theme-dark [class*="border-slate-"],
+.dashboard-theme-dark [class*="border-gray-"],
+.dashboard-theme-dark [class*="border-stone-"] {
+  border-color: #30415b !important;
+}
+
+.dashboard-shell-dark .hover\:bg-slate-100:hover,
+.dashboard-shell-dark .hover\:bg-slate-50:hover,
+.dashboard-theme-dark .hover\:bg-slate-50:hover,
+.dashboard-theme-dark .hover\:bg-stone-200:hover {
+  background-color: #1d2a40 !important;
+}
+
+.dashboard-theme-dark .bg-gray-100,
+.dashboard-theme-dark .bg-slate-100 {
+  background-color: #1d2a40 !important;
+}
+
+.dashboard-theme-dark .bg-indigo-50,
+.dashboard-theme-dark .bg-indigo-100 {
+  background-color: #24245d !important;
+}
+
+.dashboard-theme-dark .text-indigo-700,
+.dashboard-theme-dark .text-indigo-900,
+.dashboard-theme-dark .text-indigo-950 {
+  color: #c7d2fe !important;
+}
+
+.dashboard-theme-dark .border-indigo-100,
+.dashboard-theme-dark .border-indigo-200 {
+  border-color: #4f46a5 !important;
+}
+
+.dashboard-theme-dark .bg-emerald-50,
+.dashboard-theme-dark .bg-emerald-100 {
+  background-color: #123c35 !important;
+}
+
+.dashboard-theme-dark .bg-amber-50,
+.dashboard-theme-dark .bg-amber-100 {
+  background-color: #4a3311 !important;
+}
+
+.dashboard-theme-dark .bg-red-50,
+.dashboard-theme-dark .bg-red-100 {
+  background-color: #4a2024 !important;
+}
+
+.dashboard-theme-dark .dashboard-theme-toggle {
+  border-color: #405473;
+  background: #17243a;
+  color: #dbeafe;
+}
+
+.dashboard-theme-dark .dashboard-theme-toggle:hover {
+  background: #24334d;
+}
+
+.dashboard-theme-dark .recharts-default-tooltip {
+  border-color: #334155 !important;
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+.dashboard-theme-dark .bg-gradient-to-br {
+  background-image: linear-gradient(135deg, #172554 0%, #111c2e 52%, #312e81 100%) !important;
+}
+
+.dashboard-theme-dark [class*="bg-amber-50/"] {
+  background-color: #3f2d11 !important;
+}
+
+.dashboard-theme-dark [class*="bg-indigo-50/"] {
+  background-color: #20245a !important;
+}
+
+.dashboard-theme-dark .text-amber-800,
+.dashboard-theme-dark .text-amber-900 {
+  color: #fde68a !important;
+}
