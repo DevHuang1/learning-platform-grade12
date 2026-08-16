@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import Shell from "@/components/Shell";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Badge, Button, Card, EmptyState, StatBox } from "@/components/ui";
@@ -249,7 +249,9 @@ export default function QuizPage() {
   const [question, setQuestion] = useState<Question | null>(null);
   const [solved, setSolved] = useState(false);
   const [answer, setAnswer] = useState("");
+  const [answerError, setAnswerError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const answerInputRef = useRef<HTMLInputElement>(null);
   const [stats, setStats] = useState({ correct: 0, total: 0, streak: 0 });
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [cloudHistory, setCloudHistory] = useState<QuizHistoryRow[]>([]);
@@ -286,8 +288,15 @@ export default function QuizPage() {
     setQuestion(next);
     setSolved(false);
     setAnswer("");
+    setAnswerError(null);
     setFeedback(null);
   }
+
+  useEffect(() => {
+    if (!question || solved) return;
+    const frame = requestAnimationFrame(() => answerInputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [question, solved]);
 
   function changeUnit(next: number | "all") {
     setUnit(next);
@@ -337,6 +346,11 @@ export default function QuizPage() {
   function checkAnswer() {
     if (solved || !question) return;
     const guess = norm(answer);
+    if (!guess) {
+      setAnswerError("Type an answer before checking.");
+      requestAnimationFrame(() => answerInputRef.current?.focus());
+      return;
+    }
     const ok = guess === norm(question.word.w);
     setStats((s) => ({
       correct: ok ? s.correct + 1 : s.correct,
@@ -580,9 +594,17 @@ export default function QuizPage() {
                 )}
               </div>
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <label htmlFor="quiz-answer" className="sr-only">
+                  Your answer
+                </label>
                 <input
+                  ref={answerInputRef}
+                  id="quiz-answer"
                   value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
+                  onChange={(e) => {
+                    setAnswer(e.target.value);
+                    if (answerError) setAnswerError(null);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -590,8 +612,15 @@ export default function QuizPage() {
                     }
                   }}
                   disabled={solved}
+                  aria-invalid={Boolean(answerError)}
+                  aria-describedby={answerError ? "answer-error answer-shortcut" : "answer-shortcut"}
                   placeholder="Type the English word..."
-                  className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-medium text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-500"
+                  className={cn(
+                    "min-w-0 flex-1 rounded-xl border bg-white px-4 py-3 text-base font-medium text-slate-800 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-4 disabled:bg-slate-50 disabled:text-slate-500",
+                    answerError
+                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                      : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100",
+                  )}
                 />
                 <Button
                   size="lg"
@@ -611,7 +640,12 @@ export default function QuizPage() {
                   )}
                 </Button>
               </div>
-              <p className="mt-2 text-center text-xs text-gray-400 sm:text-left">
+              {answerError && (
+                <p id="answer-error" className="mt-2 text-sm font-medium text-red-600" role="alert">
+                  {answerError}
+                </p>
+              )}
+              <p id="answer-shortcut" className="mt-2 text-center text-xs text-gray-400 sm:text-left">
                 Press Enter to{solved ? " go to the next word" : " check"}
               </p>
               {feedback && (
