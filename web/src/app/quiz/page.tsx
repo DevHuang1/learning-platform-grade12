@@ -45,6 +45,7 @@ type Feedback = {
 };
 
 const HISTORY_KEY = "g12vocab_history";
+const SESSION_GOAL_OPTIONS = [5, 10, 15];
 
 function maskWord(word: string) {
   const chars = [...word];
@@ -253,6 +254,7 @@ export default function QuizPage() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const answerInputRef = useRef<HTMLInputElement>(null);
   const [stats, setStats] = useState({ correct: 0, total: 0, streak: 0 });
+  const [sessionGoal, setSessionGoal] = useState(5);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [cloudHistory, setCloudHistory] = useState<QuizHistoryRow[]>([]);
   const [vocabReady, setVocabReady] = useState(false);
@@ -409,6 +411,9 @@ export default function QuizPage() {
   const unitTag = question
     ? question.word.title || "Unit " + question.word.unit
     : "";
+  const completedGoal = stats.total >= sessionGoal;
+  const goalProgress = Math.min(stats.total, sessionGoal);
+  const goalPercent = sessionGoal ? Math.round((goalProgress / sessionGoal) * 100) : 0;
 
   return (
     <Shell>
@@ -541,6 +546,57 @@ export default function QuizPage() {
               icon={<FlameIcon className="h-4 w-4 text-amber-500" />}
             />
           </div>
+
+          <section className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4" aria-labelledby="session-goal-heading">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 id="session-goal-heading" className="text-sm font-semibold text-indigo-950">
+                  Session goal
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-indigo-800">
+                  {completedGoal
+                    ? "Goal reached — keep going if you want another challenge."
+                    : "Choose a target and build momentum one answer at a time."}
+                </p>
+              </div>
+              <label className="flex items-center gap-2 text-xs font-semibold text-indigo-900" htmlFor="session-goal">
+                Target
+                <select
+                  id="session-goal"
+                  value={sessionGoal}
+                  onChange={(event) => setSessionGoal(Number(event.target.value))}
+                  className="rounded-lg border border-indigo-200 bg-white px-2 py-1.5 text-xs font-semibold text-indigo-950 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100"
+                >
+                  {SESSION_GOAL_OPTIONS.map((goal) => (
+                    <option key={goal} value={goal}>
+                      {goal} answers
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="mt-3" aria-label={`Session goal progress: ${goalProgress} of ${sessionGoal} answers`}>
+              <div className="flex items-center justify-between gap-3 text-xs font-medium text-indigo-800">
+                <span>{goalProgress} of {sessionGoal} answered</span>
+                <span>{goalPercent}%</span>
+              </div>
+              <div
+                className="mt-2 h-2 overflow-hidden rounded-full bg-indigo-100"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={sessionGoal}
+                aria-valuenow={goalProgress}
+                aria-valuetext={`${goalProgress} of ${sessionGoal} answers completed`}
+              >
+                <div
+                  className="h-full rounded-full bg-indigo-600 transition-[width] duration-300"
+                  style={{ width: `${goalPercent}%` }}
+                />
+              </div>
+            </div>
+          </section>
+
           <Button
             variant="secondary"
             className="mt-3 w-full"
