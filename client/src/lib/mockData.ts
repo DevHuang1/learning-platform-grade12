@@ -24,3 +24,17 @@ export const mockSessions: StudySession[] = [
 ];
 
 export const mockPlan = { title: "Study block", schedule: "Tuesday · 16:30–17:15", description: "Review the worked examples before your practice set." };
+
+export type ExamQuestion = { id: number; prompt: string; options: string[]; answer: number; hint: string; explanation: string };
+export const mockExam = {
+  id: "physics-electric-fields",
+  title: "Electric Fields · Practice Exam",
+  subject: "Physics",
+  durationMinutes: 12,
+  questions: [
+    { id: 1, prompt: "Which statement best describes an electric field?", options: ["A region where a charge experiences force", "A path followed by an electron", "A material that stores current", "A measure of resistance"], answer: 0, hint: "Think about what would happen to a small positive test charge placed in the region.", explanation: "An electric field describes the force that would act on a positive test charge in that region." },
+    { id: 2, prompt: "If the distance from a point charge doubles, the field strength becomes…", options: ["Twice as large", "Half as large", "One quarter as large", "Unchanged"], answer: 2, hint: "The distance appears squared in the denominator of the relationship.", explanation: "For a point charge, field strength follows an inverse-square relationship with distance." },
+    { id: 3, prompt: "Electric field lines around an isolated positive charge point…", options: ["Inward", "Outward", "In circles", "Randomly"], answer: 1, hint: "Imagine the direction a positive test charge would be pushed.", explanation: "Field lines point away from positive charges and toward negative charges." },
+    { id: 4, prompt: "What is the SI unit for electric field strength?", options: ["Joule", "Newton per coulomb", "Coulomb per second", "Watt"], answer: 1, hint: "Electric field is force divided by charge.", explanation: "Electric field strength is measured in newtons per coulomb (N/C)." },
+  ] satisfies ExamQuestion[],
+};

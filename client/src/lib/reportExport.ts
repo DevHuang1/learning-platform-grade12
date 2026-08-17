@@ -1,0 +1,19 @@
+// Editorial Study Hall: generate a concise shareable report without sending student performance data to a third party.
+import { jsPDF } from "jspdf";
+import type { ExamAttempt } from "./examStorage";
+
+type QuestionAnalytics = { id: number; prompt: string; averageSeconds: number; misses: number };
+export function exportPerformanceReport({ history, questionAnalytics, examTitle }: { history: ExamAttempt[]; questionAnalytics: QuestionAnalytics[]; examTitle: string }) {
+  const pdf = new jsPDF({ unit: "pt", format: "a4" });
+  const teal = [22, 124, 128] as const; const ink = [42, 31, 24] as const; const muted = [100, 91, 82] as const;
+  const margin = 48; let y = 56;
+  pdf.setTextColor(...teal); pdf.setFont("helvetica", "bold"); pdf.setFontSize(9); pdf.text("STUDY HALL · GRADE 12", margin, y); y += 28;
+  pdf.setTextColor(...ink); pdf.setFont("helvetica", "bold"); pdf.setFontSize(25); pdf.text("Performance report", margin, y); y += 22;
+  pdf.setFont("helvetica", "normal"); pdf.setFontSize(11); pdf.setTextColor(...muted); pdf.text(examTitle, margin, y); y += 34;
+  const average = history.length ? Math.round(history.reduce((sum, item) => sum + item.percentage, 0) / history.length) : 0; const latest = history[0];
+  pdf.setFillColor(241, 244, 237); pdf.roundedRect(margin, y, 500, 68, 8, 8, "F"); pdf.setTextColor(...teal); pdf.setFont("helvetica", "bold"); pdf.setFontSize(9); pdf.text("AVERAGE SCORE", margin + 16, y + 20); pdf.text("LATEST SCORE", margin + 190, y + 20); pdf.text("ATTEMPTS", margin + 370, y + 20); pdf.setTextColor(...ink); pdf.setFontSize(20); pdf.text(`${average}%`, margin + 16, y + 46); pdf.text(`${latest?.percentage ?? 0}%`, margin + 190, y + 46); pdf.text(`${history.length}`, margin + 370, y + 46); y += 96;
+  pdf.setTextColor(...ink); pdf.setFont("helvetica", "bold"); pdf.setFontSize(14); pdf.text("Historical scores", margin, y); y += 19; pdf.setTextColor(...muted); pdf.setFont("helvetica", "normal"); pdf.setFontSize(10); history.slice(0, 8).forEach((attempt) => { pdf.text(`${new Date(attempt.completedAt).toLocaleDateString()}   ${attempt.score}/${attempt.total} correct   ${attempt.percentage}%`, margin, y); y += 16; }); y += 20;
+  pdf.setTextColor(...ink); pdf.setFont("helvetica", "bold"); pdf.setFontSize(14); pdf.text("Time spent per question", margin, y); y += 20; questionAnalytics.forEach((item) => { pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.setTextColor(...ink); pdf.text(`Q${item.id}`, margin, y); pdf.setFont("helvetica", "normal"); pdf.setTextColor(...muted); pdf.text(`${item.averageSeconds}s average`, margin + 34, y); pdf.setFillColor(...teal); pdf.roundedRect(margin + 125, y - 8, Math.max(4, Math.min(360, item.averageSeconds * 4)), 7, 3, 3, "F"); y += 20; }); y += 18;
+  pdf.setTextColor(...ink); pdf.setFont("helvetica", "bold"); pdf.setFontSize(14); pdf.text("Recurring misconception signals", margin, y); y += 20; const misses = questionAnalytics.filter((item) => item.misses > 0); if (!misses.length) { pdf.setTextColor(...muted); pdf.setFont("helvetica", "normal"); pdf.setFontSize(10); pdf.text("No recurring misses detected in the saved history.", margin, y); } else { misses.forEach((item) => { pdf.setTextColor(...ink); pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.text(`Q${item.id} · ${item.misses} missed attempt${item.misses === 1 ? "" : "s"}`, margin, y); y += 14; pdf.setTextColor(...muted); pdf.setFont("helvetica", "normal"); const lines = pdf.splitTextToSize(item.prompt, 460); pdf.text(lines, margin + 18, y); y += lines.length * 13 + 7; }); }
+  y = Math.min(y + 28, 780); pdf.setDrawColor(220, 214, 202); pdf.line(margin, y, 548, y); pdf.setTextColor(...muted); pdf.setFontSize(8); pdf.text(`Generated locally on ${new Date().toLocaleDateString()}. Share this report with a teacher, tutor, or parent.`, margin, y + 16); pdf.save("study-hall-performance-report.pdf");
+}
